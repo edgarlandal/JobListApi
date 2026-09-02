@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: joblist_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres_password}
+      POSTGRES_DB: ${DB_NAME:-joblist}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-joblist}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - internal_network
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: joblistapi
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres_password}
+      DB_NAME: ${DB_NAME:-joblist}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal_network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  internal_network:
+    driver: bridge

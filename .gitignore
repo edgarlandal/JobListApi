@@ -1,0 +1,7 @@
+# Ignore secrets and env varibles
+.env
+venv
+
+# Ignore pycache
+*.pyc
+__pycache__/
