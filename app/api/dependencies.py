@@ -10,6 +10,8 @@ from app.services.auth import AuthService
 from app.models.user import User
 from app.core.security import decode_acces_token
 
+from app.repositories.refresh_token import RefreshTokenRepository
+
 oauth_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
 
 def get_user_repository(db: AsyncSession = Depends(get_async_db)) -> UserRepository:
@@ -47,3 +49,12 @@ async def get_current_user(
         )
 
     return user
+
+def get_refresh_token_repository(db: AsyncSession = Depends(get_async_db)) -> RefreshTokenRepository:
+    return RefreshTokenRepository(db=db)
+
+def get_auth_service(
+    repo: UserRepository = Depends(get_user_repository),
+    refresh_repo: RefreshTokenRepository = Depends(get_refresh_token_repository)
+):
+    return AuthService(user_repo=repo, refresh_repo=refresh_repo)

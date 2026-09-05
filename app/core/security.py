@@ -8,7 +8,12 @@ from fastapi import HTTPException, status
 
 from app.core.config import settings
 
+import hashlib
+
 ph = PasswordHasher()
+
+def hash_token(toke: str) -> str:
+    return hashlib.sha256(toke.encode()).hexdigest()
 
 def hash_password(password: str) -> str:
     return ph.hash(password)
