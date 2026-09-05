@@ -13,6 +13,10 @@ class UserRepository:
         res = await self.db.execute(stmt)
         return res.scalar_one_or_none()
 
+    async def get_by_id(self, user_id: str) -> User | None:
+        res = await self.db.execute(select(User).where(User.id == user_id))
+        return res.scalars().first()
+    
     async def get_all(self) -> Sequence[User]:
         stmt = select(User)
         res = await self.db.execute(stmt)

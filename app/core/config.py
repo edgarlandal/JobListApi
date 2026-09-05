@@ -48,6 +48,7 @@ class Setting(BaseSettings):
     JWT_SECRET_KEY: str = Field(..., min_length=32, description="JWT Secret Key of 32 character")
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
     # API Keys 
 
