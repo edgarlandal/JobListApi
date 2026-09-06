@@ -81,7 +81,8 @@ class User(Base):
 
     last_login_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True),
-        nullable=False
+        nullable=True,
+        default=None
     )
 
     __table_args__ = (

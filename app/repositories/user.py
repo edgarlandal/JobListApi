@@ -24,11 +24,17 @@ class UserRepository:
 
     async def create(self, user: User) -> User:
         try:
-            self.db.add(User)
+            self.db.add(user)
             await self.db.commit()
             await self.db.refresh(user)
             return user
         except SQLAlchemyError:
             await self.db.rollback()
             raise
+
+    async def update(self, user: User) -> User:
+        self.db.add(user)
+        await self.db.commit()
+        await self.db.refresh(user)
+        return user
     

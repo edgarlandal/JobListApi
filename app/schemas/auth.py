@@ -15,4 +15,5 @@ class LoginRequest(BaseModel):
 class TokenData(BaseModel):
     email: str | None = None
 
-    
+class LogoutRequest(BaseModel):
+    refresh_token: str

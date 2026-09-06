@@ -1,3 +1,4 @@
+from typing import Annotated
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
@@ -12,7 +13,7 @@ from app.core.security import decode_acces_token
 
 from app.repositories.refresh_token import RefreshTokenRepository
 
-oauth_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
+oauth_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 def get_user_repository(db: AsyncSession = Depends(get_async_db)) -> UserRepository:
     return UserRepository(db=db)
@@ -24,31 +25,39 @@ def get_auth_service(repo: UserRepository = Depends(get_user_repository)) -> Aut
     return AuthService(repo)
 
 async def get_current_user(
-        token: str = Depends(oauth_scheme), 
-        user_repo: UserRepository = Depends(get_user_repository)
+        token: Annotated[str, Depends(oauth_scheme)], 
+        db: Annotated[AsyncSession, Depends(get_async_db)]
 ) -> User:
     payload = decode_acces_token(token, expected_type="access")
 
-    user_id = payload.get("sub")
-    if not user_id: raise HTTPException(
+    email: str = payload.get("sub")
+    if email is None: 
+        raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Token not contain user id"
     )
 
-    user = await user_repo.get_by_id(user_id)
-    if not user:
+    user_repo = UserRepository(db)
+    user = await user_repo.get_by_email(email)
+
+    if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not fouund"
         )
 
-    if getattr(user, "disabled", False) or not getattr(user, "is_active", True):
+    return user
+
+async def get_current_active_user(
+    current_user: User = Depends(get_current_user)
+) -> User:
+    if getattr(current_user, "disabled", False) or not getattr(current_user, "is_active", True):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="User inactive o disabled"
         )
-
-    return user
+    
+    return current_user
 
 def get_refresh_token_repository(db: AsyncSession = Depends(get_async_db)) -> RefreshTokenRepository:
     return RefreshTokenRepository(db=db)

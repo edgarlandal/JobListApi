@@ -1,6 +1,10 @@
 from fastapi import HTTPException,  status
 from app.repositories.user import UserRepository
 from app.repositories.refresh_token import RefreshTokenRepository
+from app.schemas.user import UserCreate
+from app.models.user import UserRole, User
+
+from app.core.security import hash_password
 
 from datetime import datetime, timezone, timedelta
 
@@ -17,7 +21,7 @@ from app.core.config import settings
 import uuid
 
 class AuthService:
-    def __int__(self, user_repo: UserRepository, refresh_repo: RefreshTokenRepository):
+    def __init__(self, user_repo: UserRepository, refresh_repo: RefreshTokenRepository = None):
         self.user_repo = user_repo
         self.refresh_repo = refresh_repo
 
@@ -37,6 +41,9 @@ class AuthService:
                 detail="Inactive user account"
             )
 
+        user.last_login_at = datetime.now(timezone.utc)
+        await self.user_repo.update(user)
+
         family_id = str(uuid.uuid4())
         access_token = create_access_token({"sub" : user.email})
         refresh_token = create_refresh_token({"sub" : user.email, "family_id": family_id})
@@ -47,7 +54,7 @@ class AuthService:
             user_email=user.email,
             token_hash=hash_token(refresh_token),
             family_id=family_id,
-            expire_at=expires_at
+            expires_at=expires_at
         )
 
         return {
@@ -100,7 +107,7 @@ class AuthService:
             user_email=user.email,
             token_hash=hash_token(new_refresh_token),
             family_id=db_token.family_id,
-            expire_at=expires_at
+            expires_at=expires_at
         )
 
         return {
@@ -108,3 +115,41 @@ class AuthService:
             "refresh_token": new_refresh_token,
             "token_type": "bearer"
         }
+
+    async def register_user(self, user_data: UserCreate) -> User:
+        existing_user = await self.user_repo.get_by_email(user_data.email)
+
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email is registerd"
+            )
+
+        new_user = User(
+            email=user_data.email,
+            hashed_password=hash_password(user_data.password),
+            firstname=user_data.firstname,
+            lastname=user_data.lastname,
+            role=UserRole.USER,
+            is_active=True,
+            is_verified=False
+        )
+
+        return await self.user_repo.create(new_user)
+
+    async def logout(self, refresh_token: str) -> None:
+        hashed_rt = hash_token(refresh_token)
+        db_token = await self.refresh_repo.get_by_hash(hashed_rt)
+
+        if not db_token:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid or expired refresh token"
+            )
+
+        if db_token.revoked:
+            return
+
+        await self.refresh_repo.revoke(hashed_rt)
+
+    

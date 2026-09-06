@@ -62,6 +62,7 @@ def decode_acces_token(token: str, expected_type: Literal["access", "refresh"]) 
             settings.JWT_SECRET_KEY,
             algorithms=[settings.JWT_ALGORITHM]
         )
+        
         if payload.get("type") != expected_type:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

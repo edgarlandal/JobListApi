@@ -7,12 +7,12 @@ class RefreshTokenRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def create(self, user_email: str, token_hash: str, family_id: str, expire_at: datetime) -> RefreshToken:
+    async def create(self, user_email: str, token_hash: str, family_id: str, expires_at: datetime) -> RefreshToken:
         db_token = RefreshToken(
             user_email=user_email,
             token_hash=token_hash,
             family_id=family_id,
-            expire_at=expire_at
+            expires_at=expires_at
         )
 
         self.db.commit()
@@ -21,7 +21,8 @@ class RefreshTokenRepository:
         return db_token
 
     async def get_by_hash(self, token_hash: str) -> RefreshToken | None:
-        result = await self.db.execute(select(RefreshToken).where(RefreshToken.token_hash == token_hash))
+        query = select(RefreshToken).where(RefreshToken.token_hash == token_hash)
+        result = await self.db.execute(query)
         return result.scalars().first()
 
     async def mark_as_used(self, token_id: str):
@@ -32,6 +33,17 @@ class RefreshTokenRepository:
         )
 
         await self.db.commit()
+
+    async def revoke(self, token_hash: str) -> bool:
+        stmt = (
+            update(RefreshToken)
+            .where(RefreshToken.token_hash == token_hash)
+            .values(revoked=True)
+        )
+
+        await self.db.execute(stmt)
+        await self.db.commit()
+        return True
 
     async def revoke_family(self, family_id: str):
         await self.db.execute(

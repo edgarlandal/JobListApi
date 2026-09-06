@@ -44,5 +44,6 @@ async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
         except Exception as exc:
             logger.error(f"Error transaction {exc}")
             await session.rollback()
+            raise
         finally:
             await session.close()
