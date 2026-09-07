@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from app.models.user import User
+from app.schemas.user import UserCreate, UserUpdate
 
 class UserRepository:
     def __init__(self, db: AsyncSession) -> User | None:
@@ -32,9 +33,22 @@ class UserRepository:
             await self.db.rollback()
             raise
 
-    async def update(self, user: User) -> User:
-        self.db.add(user)
+    async def save(self, db_user: User) -> User:
+        self.db.add(db_user)
         await self.db.commit()
-        await self.db.refresh(user)
-        return user
+        await self.db.refresh(db_user)
+        return db_user
+
+    async def update(self, db_user: User, user_in: UserUpdate) -> User:
+        update_data = user_in.model_dump(exclude_unset=True)
+
+        for field, value in update_data.items():
+            setattr(db_user, field, value)
+
+        return self.save(db_user)
+
+    async def delete(self, db_user: User) -> None:
+        await self.db.delete(db_user)
+        await self.db.commit()
+
     

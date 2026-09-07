@@ -1,19 +1,22 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, ConfigDict
+
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+class LogoutRequest(BaseModel):
+    refresh_token: str
+
+class TokenData(BaseModel):
+    email: EmailStr | None = None
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
 
 class TokenRespose(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
 
-class RefreshTokenRequest(BaseModel):
-    refresh_token: str
-
-class LoginRequest(BaseModel):
-    email: str
-    password: str
-
-class TokenData(BaseModel):
-    email: str | None = None
-
-class LogoutRequest(BaseModel):
-    refresh_token: str
+    model_config = ConfigDict(from_attributes=True)

@@ -1,6 +1,8 @@
 import re
 import uuid
 
+from typing import Optional
+
 from datetime import datetime
 from pydantic import BaseModel, EmailStr, ConfigDict, field_validator
 
@@ -41,6 +43,12 @@ class UserCreate(UserBase):
         if not re.search(r"[0-9]", v):
             raise ValueError("It must include at least one number")
         return v
+
+class UserUpdate(UserBase):
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
+    is_active: Optional[bool] = None
+    role: Optional[UserRole] = None
     
 class UserReponse(UserBase):
     id: uuid.UUID

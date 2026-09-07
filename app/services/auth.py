@@ -42,7 +42,7 @@ class AuthService:
             )
 
         user.last_login_at = datetime.now(timezone.utc)
-        await self.user_repo.update(user)
+        await self.user_repo.save(user)
 
         family_id = str(uuid.uuid4())
         access_token = create_access_token({"sub" : user.email})

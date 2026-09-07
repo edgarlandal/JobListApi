@@ -14,9 +14,9 @@ class RefreshTokenRepository:
             family_id=family_id,
             expires_at=expires_at
         )
-
-        self.db.commit()
-        self.db.refresh(db_token)
+        self.db.add(db_token)
+        await self.db.commit()
+        await self.db.refresh(db_token)
 
         return db_token
 

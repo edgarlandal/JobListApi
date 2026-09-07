@@ -1,14 +1,15 @@
-from typing import Annotated
+from typing import Annotated, List
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.database import get_async_db
 from app.repositories.user import UserRepository
 from app.services.user import UserService
 from app.services.auth import AuthService
 
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.core.security import decode_acces_token
 
 from app.repositories.refresh_token import RefreshTokenRepository
@@ -66,4 +67,20 @@ def get_auth_service(
     repo: UserRepository = Depends(get_user_repository),
     refresh_repo: RefreshTokenRepository = Depends(get_refresh_token_repository)
 ):
-    return AuthService(user_repo=repo, refresh_repo=refresh_repo)
+    return AuthService(user_repo=repo, refresh_repo=refresh_repo)\
+
+class RoleChecker:
+    def __init__(self, allowed_roles: List[UserRole]):
+        self.allowed_roles = allowed_roles
+
+    def __call__(self, current_user: User = Depends(get_current_active_user)) -> User:
+        if current_user.role not in self.allowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Operation not permitted: insfficient privileges"
+            )
+
+        return current_user
+
+def require_role(allowed_roles: List[UserRole]):
+    return RoleChecker(allowed_roles)
