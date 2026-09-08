@@ -17,7 +17,7 @@
 
 # DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
-from typing import Optional
+from typing import Optional, List
 from pydantic import Field, PostgresDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -42,7 +42,11 @@ class Setting(BaseSettings):
     DB_POOL_TIMEOUT: int  = 30
     DB_POOL_RECYCLE: int = 1800
     DB_ECHO: bool = False
-    
+
+    ALLOWED_ORIGINS: List[str] = [
+        "http://localhost:3000",
+        "http://localhost:5173"
+    ]
 
     # JWT 
     JWT_SECRET_KEY: str = Field(..., min_length=32, description="JWT Secret Key of 32 character")
@@ -63,7 +67,5 @@ class Setting(BaseSettings):
         extra="ignore"
     )
 
-try:
-    settings = Setting()
-except Exception as e:
-    print("Error Configuration: View enviroment variable")
+
+settings = Setting()

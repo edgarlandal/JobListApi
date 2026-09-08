@@ -1,5 +1,7 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
+
+from app.core.rate_limit import limiter
 from app.schemas.auth import TokenRespose, RefreshTokenRequest, LogoutRequest
 from app.services.auth import AuthService
 from app.api.dependencies import get_auth_service
@@ -8,7 +10,9 @@ from app.schemas.user import UserCreate, UserReponse
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
 @router.post("/login", response_model=TokenRespose)
+@limiter.limit("5/minute")
 async def login(
+    request: Request,
     form_data: OAuth2PasswordRequestForm = Depends(), 
     auth_service: AuthService = Depends(get_auth_service)
 ):
@@ -17,6 +21,7 @@ async def login(
 
 @router.post("/logout", status_code=status.HTTP_200_OK)
 async def logout(
+    request: Request,
     data: LogoutRequest,
     auth_service: AuthService = Depends(get_auth_service)
 ):
@@ -26,7 +31,9 @@ async def logout(
     }
 
 @router.post("/refresh", response_model=TokenRespose)
+@limiter.limit("10/minute")
 async def refresh_token(
+    request: Request,
     body: RefreshTokenRequest, 
     auth_service: AuthService = Depends(get_auth_service)
 ):
@@ -34,7 +41,9 @@ async def refresh_token(
     return tokens
 
 @router.post("/register", response_model=UserReponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit("3/hour")
 async def register_user(
+    request: Request,
     user_data: UserCreate,
     auth_service: AuthService = Depends(get_auth_service)
 ):

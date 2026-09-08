@@ -1,9 +1,39 @@
 from fastapi import FastAPI, APIRouter
+from fastapi.middleware.cors import CORSMiddleware
+
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
+
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+
 from app.core.config import settings
 from app.core.database import async_engine, Base
+from app.core.rate_limit import limiter
 from app.api.routes import users, auth
+from app.core.middleware import SecurityHeadersMiddleware
 
-app = FastAPI(title=settings.PROJECT_NAME, openapi_prefix="")
+app = FastAPI(title=settings.PROJECT_NAME)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=[
+        "Content-Type",
+        "Authorization",
+        "Accept",
+        "X-Requested-With"
+    ],
+    expose_headers=["Content-Disposition"]
+)
+
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=["*"])
+
+app.state.limiter = limiter
+
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 api_router = APIRouter(prefix="/api/v1")
 
