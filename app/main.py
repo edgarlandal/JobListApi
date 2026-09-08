@@ -11,6 +11,7 @@ from app.core.database import async_engine, Base
 from app.core.rate_limit import limiter
 from app.api.routes import users, auth
 from app.core.middleware import SecurityHeadersMiddleware
+from app.core.error_handlers import register_exception_handler
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
@@ -34,6 +35,8 @@ app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=["*"])
 app.state.limiter = limiter
 
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+register_exception_handler(app)
 
 api_router = APIRouter(prefix="/api/v1")
 
