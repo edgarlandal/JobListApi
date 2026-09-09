@@ -1,3 +1,5 @@
+from loguru import logger
+
 from fastapi import HTTPException,  status
 from app.repositories.user import UserRepository
 from app.repositories.refresh_token import RefreshTokenRepository
@@ -5,6 +7,7 @@ from app.schemas.user import UserCreate
 from app.models.user import UserRole, User
 
 from app.core.security import hash_password
+from app.core.exceptions import AuthenticationError
 
 from datetime import datetime, timezone, timedelta
 
@@ -29,6 +32,11 @@ class AuthService:
         user = await self.user_repo.get_by_email(email)
 
         if not user or not verify_password(password, user.hashed_password):
+            logger.warning(
+                "Authentication attempt failed: Invalid credentials",
+                event="auth.login_failed", reason="invalid_credentials"
+            )
+
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalids Credentials",
@@ -36,6 +44,7 @@ class AuthService:
             )
 
         if getattr(user, "disabled", False) or not getattr(user, "is_active", True):
+            logger.warning("login_failed", event="auth.login_failed", reason="inactive_account")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Inactive user account"
@@ -57,6 +66,7 @@ class AuthService:
             expires_at=expires_at
         )
 
+        logger.info("login_succeeded", event="auth.login_succeeded", user_id=str(user.id))
         return {
             "access_token": access_token,
             "refresh_token": refresh_token,
@@ -78,6 +88,7 @@ class AuthService:
 
         if db_token.used_at is not None or db_token.revoked:
             await self.refresh_repo.revoke_family(db_token.family_id)
+            logger.warning("refresh_reuse", event="auth.refresh_reuse", reason="sessions_revoked")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Security alert: Refresh token reuse detected. All sessions revoked."
@@ -110,6 +121,7 @@ class AuthService:
             expires_at=expires_at
         )
 
+        logger.info("refresh_succeeded", event="auth.refresh_succeeded", user_id=str(user.id))
         return {
             "access_token": new_access_token,
             "refresh_token": new_refresh_token,
@@ -135,7 +147,9 @@ class AuthService:
             is_verified=False
         )
 
-        return await self.user_repo.create(new_user)
+        created_user = await self.user_repo.create(new_user)
+        logger.info("registration_succeeded", event="auth.registered", user_id=str(created_user.id))
+        return created_user
 
     async def logout(self, refresh_token: str) -> None:
         hashed_rt = hash_token(refresh_token)
@@ -151,5 +165,6 @@ class AuthService:
             return
 
         await self.refresh_repo.revoke(hashed_rt)
+        logger.info("logout_succeeded", event="auth.logout_succeeded")
 
     

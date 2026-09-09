@@ -1,3 +1,7 @@
+from app.core.logging_config import setup_logging
+
+setup_logging()
+
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -10,10 +14,15 @@ from app.core.config import settings
 from app.core.database import async_engine, Base
 from app.core.rate_limit import limiter
 from app.api.routes import users, auth
-from app.core.middleware import SecurityHeadersMiddleware
+from app.core.middleware import SecurityHeadersMiddleware, LoggingAndCorrelationMiddleware
 from app.core.error_handlers import register_exception_handler
 
-app = FastAPI(title=settings.PROJECT_NAME)
+class LoggedFastAPI(FastAPI):
+    def build_middleware_stack(self):
+        return LoggingAndCorrelationMiddleware(super().build_middleware_stack())
+
+
+app = LoggedFastAPI(title=settings.PROJECT_NAME)
 
 app.add_middleware(
     CORSMiddleware,
@@ -24,9 +33,10 @@ app.add_middleware(
         "Content-Type",
         "Authorization",
         "Accept",
-        "X-Requested-With"
+        "X-Requested-With",
+        "X-Request-ID"
     ],
-    expose_headers=["Content-Disposition"]
+    expose_headers=["Content-Disposition", "X-Request-ID"]
 )
 
 app.add_middleware(SecurityHeadersMiddleware)

@@ -82,5 +82,5 @@ def decode_acces_token(token: str, expected_type: Literal["access", "refresh"]) 
 
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token is invalid",
-            headers={"WWWW-Autheticate", "Bearer"}
+            headers={"WWW-Authenticate": "Bearer"}
         )

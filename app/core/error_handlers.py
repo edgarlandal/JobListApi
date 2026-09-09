@@ -1,4 +1,4 @@
-import logging
+from loguru import logger
 
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
@@ -14,7 +14,7 @@ from app.core.exceptions import (
     ResourceNotFoundError
 )
 
-logger = logging.getLogger(__name__)
+
 
 def register_exception_handler(app: FastAPI) -> None:
 
@@ -54,7 +54,7 @@ def register_exception_handler(app: FastAPI) -> None:
         )
 
     # 4. Resource Not Found
-    @app.exception_handler(AuthorizationError)
+    @app.exception_handler(ResourceNotFoundError)
     async def not_found_exption_handler(request: Request, exc: ResourceNotFoundError):
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -65,7 +65,7 @@ def register_exception_handler(app: FastAPI) -> None:
     @app.exception_handler(SQLAlchemyError)
     @app.exception_handler(DataBaseOperationError)
     async def database_exception_handler(request: Request, exc: Exception):
-        logger.error(f"Database error in {request.method} {request.url.path}: {str(exc)}", exc_info=True)
+        logger.error("database_error", event="error.database", exception_type=type(exc).__name__)
 
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -78,13 +78,8 @@ def register_exception_handler(app: FastAPI) -> None:
     # 6. Unexpected / Unhandled Errors (500 Internal Server Error)
     @app.exception_handler(Exception)
     async def unexpected_exception_handler(request: Request, exc: Exception):
-        logger.critical(f"Unhandled Exception in {request.method} {request.url.path}: {str(exc)}", exc_info=True)
-
-        is_production = getattr(settings, "ENVIROMENT", "production").lower() == "production"
-        message = "It must include at least one lowercase letter"
-
-        if not is_production:
-            message = f"Debug Info: {str(exc)}"
+        logger.error("unhandled_error", event="error.unhandled", exception_type=type(exc).__name__)
+        message = "There was an internal error processing the request."
 
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

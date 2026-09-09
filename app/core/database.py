@@ -18,7 +18,8 @@ class Base(DeclarativeBase):
 
 async_engine: AsyncEngine = create_async_engine(
     settings.database_url,
-    echo=settings.DB_ECHO,
+    echo=False,
+    hide_parameters=True,
     pool_size=settings.DB_POOL_SIZE,
     max_overflow=settings.DB_MAX_OVERFLOW,
     pool_timeout=settings.DB_POOL_TIMEOUT,
@@ -39,10 +40,8 @@ async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
         try:
             yield session
         except SQLAlchemyError as exc:
-            logger.error(f"Error database session: {exc}")
             raise
         except Exception as exc:
-            logger.error(f"Error transaction {exc}")
             await session.rollback()
             raise
         finally:
