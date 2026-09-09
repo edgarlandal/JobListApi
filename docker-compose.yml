@@ -3,6 +3,8 @@ services:
     image: postgres:16-alpine
     container_name: joblist_postgres
     restart: always
+    ports:
+      - "5433:5432"
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres_password}
@@ -17,6 +19,22 @@ services:
       start_period: 30s
     networks:
       - internal_network
+  redis:
+    image: redis:7-alpine
+    container_name: joblist_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal_network
+
 
   api:
     build:
@@ -32,14 +50,19 @@ services:
       DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres_password}
       DB_NAME: ${DB_NAME:-joblist}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - internal_network
 
 volumes:
   postgres_data:
+    driver: local
+  redis_data:
     driver: local
 
 networks:

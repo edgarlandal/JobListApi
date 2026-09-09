@@ -1,17 +1,170 @@
+from loguru import logger
+
 from fastapi import HTTPException,  status
 from app.repositories.user import UserRepository
-from app.core.security import verify_password, create_access_token
+from app.repositories.refresh_token import RefreshTokenRepository
+from app.schemas.user import UserCreate
+from app.models.user import UserRole, User
+
+from app.core.security import hash_password
+from app.core.exceptions import AuthenticationError
+
+from datetime import datetime, timezone, timedelta
+
+from app.core.security import (
+    verify_password, 
+    create_access_token,
+    create_refresh_token,
+    decode_acces_token,
+    hash_token
+)
+
+from app.core.config import settings
+
+import uuid
 
 class AuthService:
-    def __int__(self, user_repo: UserRepository):
+    def __init__(self, user_repo: UserRepository, refresh_repo: RefreshTokenRepository = None):
         self.user_repo = user_repo
+        self.refresh_repo = refresh_repo
 
-    async def authenticate_user(self, email: str, password: str) -> str:
+    async def authenticate_user(self, email: str, password: str) -> dict:
         user = await self.user_repo.get_by_email(email)
 
         if not user or not verify_password(password, user.hashed_password):
+            logger.warning(
+                "Authentication attempt failed: Invalid credentials",
+                event="auth.login_failed", reason="invalid_credentials"
+            )
+
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalids Credentials"
+                detail="Invalids Credentials",
+                headers={"WWW-Authenticate": "Bearer"}
             )
-        return create_access_token(data={"sub": user.email})
+
+        if getattr(user, "disabled", False) or not getattr(user, "is_active", True):
+            logger.warning("login_failed", event="auth.login_failed", reason="inactive_account")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Inactive user account"
+            )
+
+        user.last_login_at = datetime.now(timezone.utc)
+        await self.user_repo.save(user)
+
+        family_id = str(uuid.uuid4())
+        access_token = create_access_token({"sub" : user.email})
+        refresh_token = create_refresh_token({"sub" : user.email, "family_id": family_id})
+
+        expires_at = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+
+        await self.refresh_repo.create(
+            user_email=user.email,
+            token_hash=hash_token(refresh_token),
+            family_id=family_id,
+            expires_at=expires_at
+        )
+
+        logger.info("login_succeeded", event="auth.login_succeeded", user_id=str(user.id))
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer"
+        }
+
+    async def refresh_access_token(self, refresh_token: str) -> dict:
+        payload = decode_acces_token(refresh_token, expected_type="refresh")
+        email = payload.get("sub")
+
+        token_hash = hash_token(refresh_token)
+        db_token = await self.refresh_repo.get_by_hash(token_hash)
+
+        if not db_token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or untrusted refresh token"
+            )
+
+        if db_token.used_at is not None or db_token.revoked:
+            await self.refresh_repo.revoke_family(db_token.family_id)
+            logger.warning("refresh_reuse", event="auth.refresh_reuse", reason="sessions_revoked")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Security alert: Refresh token reuse detected. All sessions revoked."
+            )
+
+        if db_token.expires_at < datetime.now(timezone.utc):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Refresh token expired"
+            )
+
+        user = await self.user_repo.get_by_email(email)
+        if not user or getattr(user, "disabled", False) or not getattr(user, "is_active", True):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found or inactive"
+            )
+
+        await self.refresh_repo.mark_as_used(db_token.id)
+
+        new_access_token = create_access_token(data={"sub": user.email})
+        new_refresh_token = create_refresh_token(data={"sub": user.email, "family_id": db_token.family_id})
+
+        expires_at = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+
+        await self.refresh_repo.create(
+            user_email=user.email,
+            token_hash=hash_token(new_refresh_token),
+            family_id=db_token.family_id,
+            expires_at=expires_at
+        )
+
+        logger.info("refresh_succeeded", event="auth.refresh_succeeded", user_id=str(user.id))
+        return {
+            "access_token": new_access_token,
+            "refresh_token": new_refresh_token,
+            "token_type": "bearer"
+        }
+
+    async def register_user(self, user_data: UserCreate) -> User:
+        existing_user = await self.user_repo.get_by_email(user_data.email)
+
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email is registerd"
+            )
+
+        new_user = User(
+            email=user_data.email,
+            hashed_password=hash_password(user_data.password),
+            firstname=user_data.firstname,
+            lastname=user_data.lastname,
+            role=UserRole.USER,
+            is_active=True,
+            is_verified=False
+        )
+
+        created_user = await self.user_repo.create(new_user)
+        logger.info("registration_succeeded", event="auth.registered", user_id=str(created_user.id))
+        return created_user
+
+    async def logout(self, refresh_token: str) -> None:
+        hashed_rt = hash_token(refresh_token)
+        db_token = await self.refresh_repo.get_by_hash(hashed_rt)
+
+        if not db_token:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid or expired refresh token"
+            )
+
+        if db_token.revoked:
+            return
+
+        await self.refresh_repo.revoke(hashed_rt)
+        logger.info("logout_succeeded", event="auth.logout_succeeded")
+
+    
