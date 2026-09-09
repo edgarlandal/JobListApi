@@ -13,7 +13,7 @@ from slowapi.errors import RateLimitExceeded
 from app.core.config import settings
 from app.core.database import async_engine, Base
 from app.core.rate_limit import limiter
-from app.api.routes import users, auth
+from app.api.routes import users, auth, healthy
 from app.core.middleware import SecurityHeadersMiddleware, LoggingAndCorrelationMiddleware
 from app.core.error_handlers import register_exception_handler
 
@@ -52,14 +52,13 @@ api_router = APIRouter(prefix="/api/v1")
 
 api_router.include_router(auth.router)
 api_router.include_router(users.router)
+api_router.include_router(healthy.router)
 
 @api_router.on_event("startup")
 async def stardup():
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-@api_router.get("/", tags=["Health"])
-async def health_check():
-    return {"status": "ok"}
+
 
 app.include_router(api_router)
