@@ -22,43 +22,42 @@ class LoggedFastAPI(FastAPI):
         return LoggingAndCorrelationMiddleware(super().build_middleware_stack())
 
 
-app = LoggedFastAPI(title=settings.PROJECT_NAME)
+def create_app():
+    app = LoggedFastAPI(title=settings.PROJECT_NAME)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=[
-        "Content-Type",
-        "Authorization",
-        "Accept",
-        "X-Requested-With",
-        "X-Request-ID"
-    ],
-    expose_headers=["Content-Disposition", "X-Request-ID"]
-)
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.ALLOWED_ORIGINS,
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=[
+            "Content-Type",
+            "Authorization",
+            "Accept",
+            "X-Requested-With",
+            "X-Request-ID"
+        ],
+        expose_headers=["Content-Disposition", "X-Request-ID"]
+    )
 
-app.add_middleware(SecurityHeadersMiddleware)
-app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=["*"])
+    app.add_middleware(SecurityHeadersMiddleware)
+    app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=["*"])
 
-app.state.limiter = limiter
+    app.state.limiter = limiter
 
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-register_exception_handler(app)
+    register_exception_handler(app)
 
-api_router = APIRouter(prefix="/api/v1")
+    api_router = APIRouter(prefix="/api/v1")
 
-api_router.include_router(auth.router)
-api_router.include_router(users.router)
-api_router.include_router(healthy.router)
+    api_router.include_router(auth.router)
+    api_router.include_router(users.router)
+    api_router.include_router(healthy.router)
 
-@api_router.on_event("startup")
-async def stardup():
-    async with async_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    app.include_router(api_router)
 
+    return app
 
 
-app.include_router(api_router)
+app = create_app()

@@ -17,4 +17,16 @@ Para agregar eventos usa mensajes constantes y metadatos controlados, por ejempl
 No interpolar passwords, tokens, secrets ni objetos completos: la redaccion de campos sensibles
 anidados y JWT es una defensa adicional, no un detector de cualquier secreto en texto libre.
 
-Pruebas: `.venv/Scripts/python.exe -m unittest discover -s test -v`.
+### Pruebas
+
+Instala las dependencias y ejecuta toda la suite (integracion y logging):
+
+```powershell
+.venv/Scripts/python.exe -m pip install -r requirements-dev.txt
+.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
+```
+
+Los fixtures crean una base SQLite en memoria por test y usan Redis en memoria.
+No conectan a la base de `.env` ni ejecutan el startup de la aplicacion.
+Estas pruebas no sustituyen la validacion de migraciones y comportamiento especifico de PostgreSQL.
+El aviso de FastAPI sobre `on_event` corresponde al startup existente.
