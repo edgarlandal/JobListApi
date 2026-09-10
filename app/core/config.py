@@ -20,6 +20,7 @@
 from typing import Optional, List
 from pydantic import Field, PostgresDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy.engine import URL
 
 class Setting(BaseSettings):
     PROJECT_NAME: str = "Job List"
@@ -58,7 +59,21 @@ class Setting(BaseSettings):
 
     @property
     def database_url(self) -> str:
-        return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        return self._database_url("postgresql+asyncpg").render_as_string(hide_password=False)
+
+    @property
+    def migration_database_url(self) -> URL:
+        return self._database_url("postgresql+psycopg2")
+
+    def _database_url(self, driver: str) -> URL:
+        return URL.create(
+            drivername=driver,
+            username=self.DB_USER,
+            password=self.DB_PASSWORD,
+            host=self.DB_HOST,
+            port=int(self.DB_PORT),
+            database=self.DB_NAME,
+        )
 
     model_config = SettingsConfigDict(
         env_file=".env",

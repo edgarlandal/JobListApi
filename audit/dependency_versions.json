@@ -1,0 +1,110 @@
+[
+  {
+    "package": "alembic",
+    "declared": "==1.19.1",
+    "resolved": "1.19.1",
+    "latest": "1.19.2"
+  },
+  {
+    "package": "argon2",
+    "declared": "==0.1.10",
+    "resolved": "0.1.10",
+    "latest": "0.1.10"
+  },
+  {
+    "package": "argon2-cffi",
+    "declared": "==25.1.0",
+    "resolved": "25.1.0",
+    "latest": "25.1.0"
+  },
+  {
+    "package": "fastapi",
+    "declared": "==0.141.1",
+    "resolved": "0.141.1",
+    "latest": "0.141.1"
+  },
+  {
+    "package": "pydantic",
+    "declared": "==2.13.5",
+    "resolved": "2.13.5",
+    "latest": "2.13.5"
+  },
+  {
+    "package": "pydantic-settings",
+    "declared": "==2.15.0",
+    "resolved": "2.15.0",
+    "latest": "2.15.0"
+  },
+  {
+    "package": "pyjwt",
+    "declared": "==2.13.0",
+    "resolved": "2.13.0",
+    "latest": "2.13.0"
+  },
+  {
+    "package": "sqlalchemy",
+    "declared": "==2.0.52",
+    "resolved": "2.0.52",
+    "latest": "2.0.52"
+  },
+  {
+    "package": "uvicorn",
+    "declared": "",
+    "resolved": "0.52.4",
+    "latest": "0.52.4"
+  },
+  {
+    "package": "pydantic",
+    "declared": "",
+    "resolved": "2.13.5",
+    "latest": "2.13.5"
+  },
+  {
+    "package": "asyncpg",
+    "declared": "==0.29.0",
+    "resolved": "0.29.0",
+    "latest": "0.31.0"
+  },
+  {
+    "package": "python-multipart",
+    "declared": "==0.0.32",
+    "resolved": "0.0.32",
+    "latest": "0.0.32"
+  },
+  {
+    "package": "loguru",
+    "declared": "==0.7.3",
+    "resolved": "0.7.3",
+    "latest": "0.7.3"
+  },
+  {
+    "package": "starlette",
+    "declared": "==1.6.0",
+    "resolved": "1.6.0",
+    "latest": "1.6.0"
+  },
+  {
+    "package": "slowapi",
+    "declared": ">=0.1.9",
+    "resolved": "0.1.10",
+    "latest": "0.1.10"
+  },
+  {
+    "package": "redis",
+    "declared": ">=5.0.0",
+    "resolved": "8.1.0",
+    "latest": "8.1.0"
+  },
+  {
+    "package": "pip-audit",
+    "declared": "==2.10.1",
+    "resolved": "2.10.1",
+    "latest": "2.10.1"
+  },
+  {
+    "package": "psycopg2-binary",
+    "declared": "==2.9.12",
+    "resolved": "2.9.12",
+    "latest": "2.9.13"
+  }
+]

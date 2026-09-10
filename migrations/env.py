@@ -1,10 +1,12 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import create_engine, pool
 from alembic import context
 
 from app.core.database import Base
+from app.core.config import settings
 import app.models.user  # noqa: F401
+import app.models.refresh_token  # noqa: F401
 
 config = context.config
 
@@ -31,7 +33,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    url = settings.migration_database_url
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -50,9 +52,9 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
+    connectable = create_engine(
+        settings.migration_database_url,
+        hide_parameters=True,
         poolclass=pool.NullPool,
     )
 

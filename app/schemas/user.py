@@ -56,7 +56,7 @@ class UserReponse(UserBase):
     is_active: bool
     is_verified: bool
     created_at: datetime
-    last_login_at: datetime
+    last_login_at: Optional[datetime]
 
     model_config = ConfigDict(from_attributes=True)
 
