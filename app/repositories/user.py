@@ -18,7 +18,7 @@ class UserRepository:
         res = await self.db.execute(select(User).where(User.id == user_id))
         return res.scalars().first()
     
-    async def get_all(self) -> Sequence[User]:
+    async def get_all(self, skip: int, limit: int) -> Sequence[User]:
         stmt = select(User)
         res = await self.db.execute(stmt)
         return res.scalars().all()

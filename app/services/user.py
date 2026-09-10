@@ -1,7 +1,8 @@
 from typing import Sequence
 from fastapi import HTTPException, status
 from app.repositories.user import UserRepository
-from app.schemas.user import UserCreate, UserUpdate
+from app.schemas.user import UserCreate, UserUpdate, UserReponse
+from app.schemas.pagination import PaginateResponse, PaginationParams
 from app.models.user import User
 from app.core.security import hash_password
 
@@ -9,8 +10,17 @@ class UserService:
     def __init__(self, user_repo: UserRepository):
         self.user_repo = user_repo
     
-    async def get_users(self, skip: int = 0, limit: int = 100):
-        return await self.user_repo.get_all(skip=skip, limit=limit)
+    async def get_users(self, params: PaginationParams) ->PaginateResponse:
+        users, total = await self.user_repo.get_all(skip=params.offset, limit=params.limit)
+
+        user_schema = [UserReponse.model_validate(u) for u in users]
+
+        return PaginateResponse[UserReponse](
+            items=user_schema,
+            total=total,
+            limit=params.limit,
+            offset=params.offset
+        )
 
     async def get_user_by_id(self, user_id: str) -> User:
         user = await self.user_repo.get_by_id(user_id)

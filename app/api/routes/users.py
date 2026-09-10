@@ -6,6 +6,7 @@ from app.services.user import UserService
 from app.models.user import UserRole
 from app.api.dependencies import get_user_service, get_current_active_user, require_role
 from app.models.user import User
+from app.schemas.pagination import PaginationParams
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -26,10 +27,9 @@ async def get_my_profile(
 async def list_users(
     actor: Annotated[User, Depends(require_role([UserRole.ADMIN]))],
     service: Annotated[UserService, Depends(get_user_service)],
-    skip: int = Query(0, ge=0),
-    limit: int = Query(100, get=1, le=100)
+    pagination: PaginationParams = Depends()
 ):
-    result = await service.get_users(skip=skip, limit=limit)
+    result = await service.get_users(pagination)
     logger.info("users_listed", event="admin.users_listed", actor_id=str(actor.id))
     return result
 
