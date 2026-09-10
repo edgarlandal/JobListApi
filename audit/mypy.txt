@@ -1,0 +1,27 @@
+app\repositories\base_repository.py:21: error: Incompatible return value type (got "tuple[list[ModelType], int | None]", expected "tuple[list[ModelType], int]")  [return-value]
+app\core\config.py:86: error: Missing named argument "DB_HOST" for "Setting"  [call-arg]
+app\core\config.py:86: error: Missing named argument "DB_PORT" for "Setting"  [call-arg]
+app\core\config.py:86: error: Missing named argument "DB_NAME" for "Setting"  [call-arg]
+app\core\config.py:86: error: Missing named argument "DB_USER" for "Setting"  [call-arg]
+app\core\config.py:86: error: Missing named argument "DB_PASSWORD" for "Setting"  [call-arg]
+app\core\config.py:86: error: Missing named argument "JWT_SECRET_KEY" for "Setting"  [call-arg]
+app\schemas\user.py:48: error: Incompatible types in assignment (expression has type "str | None", base class "UserBase" defined the type as "str")  [assignment]
+app\repositories\user.py:10: error: The return type of "__init__" must be None  [misc]
+app\repositories\user.py:10: error: Missing return statement  [return]
+app\repositories\user.py:26: error: Incompatible return value type (got "tuple[Sequence[User], int | None]", expected "tuple[Sequence[User], int]")  [return-value]
+app\services\auth.py:27: error: Incompatible default for parameter "refresh_repo" (default has type "None", parameter has type "RefreshTokenRepository")  [assignment]
+app\services\auth.py:27: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+app\services\auth.py:27: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+app\services\auth.py:78: error: Item "None" of "dict[Any, Any] | None" has no attribute "get"  [union-attr]
+app\services\auth.py:103: error: Argument 1 to "get_by_email" of "UserRepository" has incompatible type "Any | None"; expected "str"  [arg-type]
+app\api\dependencies.py:34: error: Item "None" of "dict[Any, Any] | None" has no attribute "get"  [union-attr]
+app\api\dependencies.py:34: error: Incompatible types in assignment (expression has type "Any | None", variable has type "str")  [assignment]
+app\api\dependencies.py:66: error: Name "get_auth_service" already defined on line 25  [no-redef]
+app\main.py:43: error: Argument 1 to "add_middleware" of "Starlette" has incompatible type "type[SecurityHeadersMiddleware]"; expected "_MiddlewareFactory[[]]"  [arg-type]
+app\main.py:43: note: Following member(s) of "SecurityHeadersMiddleware" have conflicts:
+app\main.py:43: note:     Expected:
+app\main.py:43: note:         def __call__(Callable[[Any, Callable[[], Awaitable[Any]], Callable[[Any], Awaitable[None]]], Awaitable[None]], /) -> Callable[[Any, Callable[[], Awaitable[Any]], Callable[[Any], Awaitable[None]]], Awaitable[None]]
+app\main.py:43: note:     Got:
+app\main.py:43: note:         def SecurityHeadersMiddleware(app: FastAPI, is_production: bool = ...) -> SecurityHeadersMiddleware
+app\main.py:43: note: "_MiddlewareFactory[[]].__call__" has type "Callable[[Callable[[Any, Callable[[], Awaitable[Any]], Callable[[Any], Awaitable[None]]], Awaitable[None]]], Callable[[Any, Callable[[], Awaitable[Any]], Callable[[Any], Awaitable[None]]], Awaitable[None]]]"
+app\main.py:48: error: Argument 2 to "add_exception_handler" of "Starlette" has incompatible type "Callable[[Request[State], RateLimitExceeded], Response]"; expected "Callable[[Request[State], Exception], Response | Awaitable[Response]] | Callable[[WebSocket[State], Exception], Awaitable[None]]"  [arg-type]

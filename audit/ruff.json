@@ -1,0 +1,850 @@
+[
+  {
+    "cell": null,
+    "code": "F811",
+    "end_location": {
+      "column": 21,
+      "row": 66
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\api\\dependencies.py",
+    "fix": null,
+    "location": {
+      "column": 5,
+      "row": 66
+    },
+    "message": "Redefinition of unused `get_auth_service` from line 25: `get_auth_service` redefined here",
+    "name": "redefined-while-unused",
+    "noqa_row": 66,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/redefined-while-unused"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 24,
+      "row": 2
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\api\\routes\\users.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from typing import Annotated",
+          "end_location": {
+            "column": 35,
+            "row": 2
+          },
+          "location": {
+            "column": 1,
+            "row": 2
+          }
+        }
+      ],
+      "message": "Remove unused import: `typing.List`"
+    },
+    "location": {
+      "column": 20,
+      "row": 2
+    },
+    "message": "`typing.List` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 2,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 54,
+      "row": 3
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\api\\routes\\users.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from fastapi import APIRouter, Depends, status",
+          "end_location": {
+            "column": 54,
+            "row": 3
+          },
+          "location": {
+            "column": 1,
+            "row": 3
+          }
+        }
+      ],
+      "message": "Remove unused import: `fastapi.Query`"
+    },
+    "location": {
+      "column": 49,
+      "row": 3
+    },
+    "message": "`fastapi.Query` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 3,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 75,
+      "row": 7
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\api\\routes\\users.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from app.api.dependencies import get_user_service, require_role",
+          "end_location": {
+            "column": 89,
+            "row": 7
+          },
+          "location": {
+            "column": 1,
+            "row": 7
+          }
+        }
+      ],
+      "message": "Remove unused import: `app.api.dependencies.get_current_active_user`"
+    },
+    "location": {
+      "column": 52,
+      "row": 7
+    },
+    "message": "`app.api.dependencies.get_current_active_user` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 7,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 28,
+      "row": 20
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\core\\config.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from typing import List",
+          "end_location": {
+            "column": 34,
+            "row": 20
+          },
+          "location": {
+            "column": 1,
+            "row": 20
+          }
+        }
+      ],
+      "message": "Remove unused import: `typing.Optional`"
+    },
+    "location": {
+      "column": 20,
+      "row": 20
+    },
+    "message": "`typing.Optional` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 20,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 40,
+      "row": 21
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\core\\config.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from pydantic import Field",
+          "end_location": {
+            "column": 40,
+            "row": 21
+          },
+          "location": {
+            "column": 1,
+            "row": 21
+          }
+        }
+      ],
+      "message": "Remove unused import: `pydantic.PostgresDsn`"
+    },
+    "location": {
+      "column": 29,
+      "row": 21
+    },
+    "message": "`pydantic.PostgresDsn` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 21,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F841",
+    "end_location": {
+      "column": 38,
+      "row": 42
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\core\\database.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 38,
+            "row": 42
+          },
+          "location": {
+            "column": 31,
+            "row": 42
+          }
+        }
+      ],
+      "message": "Remove assignment to unused variable `exc`"
+    },
+    "location": {
+      "column": 35,
+      "row": 42
+    },
+    "message": "Local variable `exc` is assigned to but never used",
+    "name": "unused-variable",
+    "noqa_row": 42,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-variable"
+  },
+  {
+    "cell": null,
+    "code": "F841",
+    "end_location": {
+      "column": 32,
+      "row": 44
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\core\\database.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 32,
+            "row": 44
+          },
+          "location": {
+            "column": 25,
+            "row": 44
+          }
+        }
+      ],
+      "message": "Remove assignment to unused variable `exc`"
+    },
+    "location": {
+      "column": 29,
+      "row": 44
+    },
+    "message": "Local variable `exc` is assigned to but never used",
+    "name": "unused-variable",
+    "noqa_row": 44,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-variable"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 37,
+      "row": 8
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\core\\error_handlers.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 9
+          },
+          "location": {
+            "column": 1,
+            "row": 8
+          }
+        }
+      ],
+      "message": "Remove unused import: `app.core.config.settings`"
+    },
+    "location": {
+      "column": 29,
+      "row": 8
+    },
+    "message": "`app.core.config.settings` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 8,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 20,
+      "row": 13
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\core\\error_handlers.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from app.core.exceptions import (\r\n    AuthenticationError,\r\n    AuthorizationError,\r\n    DataBaseOperationError,\r\n    ResourceNotFoundError\r\n)",
+          "end_location": {
+            "column": 2,
+            "row": 15
+          },
+          "location": {
+            "column": 1,
+            "row": 9
+          }
+        }
+      ],
+      "message": "Remove unused import: `app.core.exceptions.DomainException`"
+    },
+    "location": {
+      "column": 5,
+      "row": 13
+    },
+    "message": "`app.core.exceptions.DomainException` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 13,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 39,
+      "row": 5
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\main.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 5
+    },
+    "message": "Module level import not at top of file",
+    "name": "module-import-not-at-top-of-file",
+    "noqa_row": 5,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 51,
+      "row": 6
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\main.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 6
+    },
+    "message": "Module level import not at top of file",
+    "name": "module-import-not-at-top-of-file",
+    "noqa_row": 6,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 68,
+      "row": 8
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\main.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 8
+    },
+    "message": "Module level import not at top of file",
+    "name": "module-import-not-at-top-of-file",
+    "noqa_row": 8,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 49,
+      "row": 10
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\main.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 10
+    },
+    "message": "Module level import not at top of file",
+    "name": "module-import-not-at-top-of-file",
+    "noqa_row": 10,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 45,
+      "row": 11
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\main.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 11
+    },
+    "message": "Module level import not at top of file",
+    "name": "module-import-not-at-top-of-file",
+    "noqa_row": 11,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 37,
+      "row": 13
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\main.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 13
+    },
+    "message": "Module level import not at top of file",
+    "name": "module-import-not-at-top-of-file",
+    "noqa_row": 13,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 49,
+      "row": 14
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\main.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 14
+    },
+    "message": "Module level import not at top of file",
+    "name": "module-import-not-at-top-of-file",
+    "noqa_row": 14,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 43,
+      "row": 14
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\main.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 15
+          },
+          "location": {
+            "column": 1,
+            "row": 14
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 31,
+      "row": 14
+    },
+    "message": "`app.core.database.async_engine` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 14,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 49,
+      "row": 14
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\main.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 15
+          },
+          "location": {
+            "column": 1,
+            "row": 14
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 45,
+      "row": 14
+    },
+    "message": "`app.core.database.Base` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 14,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 40,
+      "row": 15
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\main.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 15
+    },
+    "message": "Module level import not at top of file",
+    "name": "module-import-not-at-top-of-file",
+    "noqa_row": 15,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 48,
+      "row": 16
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\main.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 16
+    },
+    "message": "Module level import not at top of file",
+    "name": "module-import-not-at-top-of-file",
+    "noqa_row": 16,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 91,
+      "row": 17
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\main.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 17
+    },
+    "message": "Module level import not at top of file",
+    "name": "module-import-not-at-top-of-file",
+    "noqa_row": 17,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 63,
+      "row": 18
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\main.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 18
+    },
+    "message": "Module level import not at top of file",
+    "name": "module-import-not-at-top-of-file",
+    "noqa_row": 18,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 63,
+      "row": 4
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\models\\refresh_token.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from sqlalchemy.orm import Mapped, mapped_column",
+          "end_location": {
+            "column": 63,
+            "row": 4
+          },
+          "location": {
+            "column": 1,
+            "row": 4
+          }
+        }
+      ],
+      "message": "Remove unused import: `sqlalchemy.orm.relationship`"
+    },
+    "location": {
+      "column": 51,
+      "row": 4
+    },
+    "message": "`sqlalchemy.orm.relationship` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 4,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 40,
+      "row": 7
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\repositories\\user.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from app.schemas.user import UserUpdate",
+          "end_location": {
+            "column": 52,
+            "row": 7
+          },
+          "location": {
+            "column": 1,
+            "row": 7
+          }
+        }
+      ],
+      "message": "Remove unused import: `app.schemas.user.UserCreate`"
+    },
+    "location": {
+      "column": 30,
+      "row": 7
+    },
+    "message": "`app.schemas.user.UserCreate` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 7,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 52,
+      "row": 10
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\services\\auth.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 11
+          },
+          "location": {
+            "column": 1,
+            "row": 10
+          }
+        }
+      ],
+      "message": "Remove unused import: `app.core.exceptions.AuthenticationError`"
+    },
+    "location": {
+      "column": 33,
+      "row": 10
+    },
+    "message": "`app.core.exceptions.AuthenticationError` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 10,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 28,
+      "row": 1
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\app\\services\\user.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 2
+          },
+          "location": {
+            "column": 1,
+            "row": 1
+          }
+        }
+      ],
+      "message": "Remove unused import: `typing.Sequence`"
+    },
+    "location": {
+      "column": 20,
+      "row": 1
+    },
+    "message": "`typing.Sequence` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 1,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 46,
+      "row": 20
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\test\\conftest.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 20
+    },
+    "message": "Module level import not at top of file",
+    "name": "module-import-not-at-top-of-file",
+    "noqa_row": 20,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 35,
+      "row": 21
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\test\\conftest.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 21
+    },
+    "message": "Module level import not at top of file",
+    "name": "module-import-not-at-top-of-file",
+    "noqa_row": 21,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 65,
+      "row": 22
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\test\\conftest.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 22
+    },
+    "message": "Module level import not at top of file",
+    "name": "module-import-not-at-top-of-file",
+    "noqa_row": 22,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 32,
+      "row": 23
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\test\\conftest.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 23
+    },
+    "message": "Module level import not at top of file",
+    "name": "module-import-not-at-top-of-file",
+    "noqa_row": 23,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 43,
+      "row": 24
+    },
+    "filename": "C:\\Users\\mikeydrako123\\Desktop\\Projects\\JobList\\JobListApi\\test\\conftest.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 24
+    },
+    "message": "Module level import not at top of file",
+    "name": "module-import-not-at-top-of-file",
+    "noqa_row": 24,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  }
+]

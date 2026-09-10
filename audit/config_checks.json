@@ -1,0 +1,50 @@
+{
+  "environment_checks": {
+    ".env": {
+      "exists": true,
+      "tracked": false,
+      "jwt_at_least_32_chars": true,
+      "jwt_has_placeholder_marker": false,
+      "access_minutes": "60",
+      "debug": "True",
+      "db_host_is_compose_service": false,
+      "db_port_is_internal": false,
+      "redis_uses_compose_service": false,
+      "postgres_credentials_match_db": null,
+      "cors_valid_json_list": true,
+      "cors_wildcard": false,
+      "cors_all_https": false
+    },
+    ".env.production": {
+      "exists": true,
+      "tracked": false,
+      "jwt_at_least_32_chars": false,
+      "jwt_has_placeholder_marker": false,
+      "access_minutes": "30",
+      "debug": "false",
+      "db_host_is_compose_service": false,
+      "db_port_is_internal": false,
+      "redis_uses_compose_service": true,
+      "postgres_credentials_match_db": false,
+      "cors_valid_json_list": true,
+      "cors_wildcard": false,
+      "cors_all_https": true
+    }
+  },
+  "dockerignore_exists": false,
+  "tracked_files_containing_current_secret_values": [],
+  "alembic_history_contains_credential_url": true,
+  "alembic_history_contains_current_secret": true,
+  "test_log_tracked": true,
+  "production_missing_required_keys": [
+    "DB_HOST",
+    "DB_PORT",
+    "DB_NAME",
+    "DB_USER",
+    "DB_PASSWORD",
+    "JWT_SECRET_KEY"
+  ],
+  "current_secret_keys_found_in_alembic_history": [
+    "DB_PASSWORD"
+  ]
+}
