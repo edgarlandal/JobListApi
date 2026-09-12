@@ -78,7 +78,16 @@ def register_exception_handler(app: FastAPI) -> None:
     # 6. Unexpected / Unhandled Errors (500 Internal Server Error)
     @app.exception_handler(Exception)
     async def unexpected_exception_handler(request: Request, exc: Exception):
-        logger.error("unhandled_error", event="error.unhandled", exception_type=type(exc).__name__)
+        logger.error(
+            "unhandled_error",
+            exc_info=True,
+            extra={
+                "event": "error.unhandled",
+                "exception_type": type(exc).__name__,
+                "error_message": str(exc),
+            },
+        )
+
         message = "There was an internal error processing the request."
 
         return JSONResponse(

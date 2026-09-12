@@ -13,7 +13,7 @@ from slowapi.errors import RateLimitExceeded
 from app.core.config import settings
 from app.core.database import async_engine, Base
 from app.core.rate_limit import limiter
-from app.api.routes import users, auth, healthy
+from app.api.routes import users, auth, healthy, jobs
 from app.core.middleware import SecurityHeadersMiddleware, LoggingAndCorrelationMiddleware
 from app.core.error_handlers import register_exception_handler
 
@@ -50,10 +50,11 @@ def create_app():
     register_exception_handler(app)
 
     api_router = APIRouter(prefix="/api/v1")
-
+    
+    api_router.include_router(healthy.router)
     api_router.include_router(auth.router)
     api_router.include_router(users.router)
-    api_router.include_router(healthy.router)
+    api_router.include_router(jobs.router)
 
     app.include_router(api_router)
 

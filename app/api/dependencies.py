@@ -5,9 +5,13 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_async_db
+
 from app.repositories.user import UserRepository
+from app.repositories.job import JobRepository
+
 from app.services.user import UserService
 from app.services.auth import AuthService
+from app.services.job import JobService
 
 from app.models.user import User, UserRole
 from app.core.security import decode_acces_token
@@ -19,11 +23,17 @@ oauth_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 def get_user_repository(db: AsyncSession = Depends(get_async_db)) -> UserRepository:
     return UserRepository(db=db)
 
+def get_job_repository(db: AsyncSession = Depends(get_async_db)) -> JobRepository:
+    return JobRepository(db=db)
+
 def get_user_service(repo: UserRepository = Depends(get_user_repository)) -> UserService:
     return UserService(repo)
 
 def get_auth_service(repo: UserRepository = Depends(get_user_repository)) -> AuthService:
     return AuthService(repo)
+
+def get_job_service(repo: JobService = Depends(get_job_repository)) -> JobService:
+    return JobService(repo)
 
 async def get_current_user(
         token: Annotated[str, Depends(oauth_scheme)], 

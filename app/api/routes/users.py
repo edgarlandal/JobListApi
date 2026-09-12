@@ -1,6 +1,6 @@
 from loguru import logger
 from typing import List, Annotated
-from fastapi import APIRouter, Depends, status, Query
+from fastapi import APIRouter, Depends, status
 from app.schemas.user import UserCreate, UserReponse, UserUpdate
 from app.services.user import UserService
 from app.models.user import UserRole
