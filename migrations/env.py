@@ -5,8 +5,7 @@ from alembic import context
 
 from app.core.database import Base
 from app.core.config import settings
-import app.models.user  # noqa: F401
-import app.models.refresh_token  # noqa: F401
+import app.models  # noqa: F401 -- register every model in Base.metadata
 
 config = context.config
 
