@@ -128,28 +128,21 @@ class AuthService:
             "token_type": "bearer"
         }
 
-    async def register_user(self, user_data: UserCreate) -> User:
-        existing_user = await self.user_repo.get_by_email(user_data.email)
+    async def register_user(self, user_in: UserCreate) -> User:
+        existing = await self.user_repo.get_by_email(user_in.email)
 
-        if existing_user:
+        if existing:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email is registerd"
+                detail="Email exist"
             )
 
-        new_user = User(
-            email=user_data.email,
-            hashed_password=hash_password(user_data.password),
-            firstname=user_data.firstname,
-            lastname=user_data.lastname,
-            role=UserRole.USER,
-            is_active=True,
-            is_verified=False
+        db_user = User(
+            email=user_in.email,
+            hashed_password=hash_password(user_in.password)
         )
 
-        created_user = await self.user_repo.create(new_user)
-        logger.info("registration_succeeded", event="auth.registered", user_id=str(created_user.id))
-        return created_user
+        return await self.user_repo.create(db_user)
 
     async def logout(self, refresh_token: str) -> None:
         hashed_rt = hash_token(refresh_token)

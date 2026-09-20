@@ -42,7 +42,7 @@ async def get_user_by_id(
 
 @router.patch("/{user_id}", response_model=UserReponse)
 async def update_user(
-    actor: Annotated[User, Depends(require_role([UserRole.ADMIN]))],
+    actor: Annotated[User, Depends(require_role([UserRole.USER]))],
     user_id: str,
     user_in: UserUpdate,
     service: Annotated[UserService, Depends(get_user_service)]

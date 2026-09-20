@@ -46,7 +46,8 @@ USER root
 COPY . /app
 
 # 3. Dar permisos de ejecución e indicar propiedad de los archivos a appuser
-RUN chmod +x /app/scripts/entrypoint.sh && \
+RUN sed -i 's/\r$//' /app/scripts/entrypoint.sh && \
+    chmod +x /app/scripts/entrypoint.sh && \
     chown -R appuser:appgroup /app
 
 # 4. Cambiar al usuario no privilegiado justo antes de ejecutar la app

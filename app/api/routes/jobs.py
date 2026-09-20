@@ -19,14 +19,14 @@ router = APIRouter(prefix="/jobs", tags=["Jobs"])
 @router.post("", response_model=JobResponse, status_code=status.HTTP_201_CREATED)
 async def create_job(
     job_in: JobCreate,
-    actor: Annotated[User, Depends(require_role([UserRole.USER]))],
+    actor: Annotated[User, Depends(require_role([UserRole.USER,  UserRole.ADMIN]))],
     service: Annotated[JobService, Depends(get_job_service)]
 ):
     return await service.create_job(job_in, actor.id)
 
 @router.get("", response_model=PaginateResponse[JobResponse])
 async def list_jobs(
-    actor: Annotated[User, Depends(require_role(UserRole.USER))],
+    actor: Annotated[User, Depends(require_role([UserRole.USER, UserRole.ADMIN]))],
     service: Annotated[JobService, Depends(get_job_service)],
     pagination: PaginationParams = Depends()
 ):
@@ -34,14 +34,14 @@ async def list_jobs(
     logger.info("jobs_listed",  event="user.jobs_listed", actor_id=str(actor.id))
     return result
 
-@router.get("/{job_id}", response_model=JobResponse, dependencies=[Depends(require_role(UserRole.USER))])
+@router.get("/{job_id}", response_model=JobResponse, dependencies=[Depends(require_role([UserRole.USER, UserRole.ADMIN]))])
 async def get_job(
     job_id: str,
     service: Annotated[JobService, Depends(get_job_service)],
 ):
     return await service.get_job_by_id(job_id)
 
-@router.patch("/{job_id}", response_model=JobResponse, dependencies=[Depends(require_role([UserRole.USER]))])
+@router.patch("/{job_id}", response_model=JobResponse, dependencies=[Depends(require_role([UserRole.USER, UserRole.ADMIN]))])
 async def update_job(
     job_id: str,
     job_in: JobUpdate,
@@ -51,7 +51,7 @@ async def update_job(
     logger.info("job_updated", event="user.job_updated")
     return result
 
-@router.delete("/{job_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_role(UserRole.USER))])
+@router.delete("/{job_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_role([UserRole.USER, UserRole.ADMIN]))])
 async def delete_job(
     job_id: str,
     service: Annotated[JobService, Depends(get_job_service)]

@@ -1,29 +1,38 @@
+from loguru import logger
+
 from fastapi import HTTPException, status
 from app.repositories.user import UserRepository
 from app.schemas.user import UserCreate, UserUpdate, UserReponse
 from app.schemas.pagination import PaginateResponse, PaginationParams
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.core.security import hash_password
 
 class UserService:
     def __init__(self, user_repo: UserRepository):
         self.user_repo = user_repo
 
-    async def register_user(self, user_in: UserCreate) -> User:
-        existing = await self.user_repo.get_by_email(user_in.email)
+    async def register_user(self, user_data: UserCreate) -> User:
+        existing_user = await self.user_repo.get_by_email(user_data.email)
 
-        if existing:
+        if existing_user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email exist"
+                detail="Email is registerd"
             )
 
-        db_user = User(
-            email=user_in.email,
-            hashed_password=hash_password(user_in.password)
+        new_user = User(
+            email=user_data.email,
+            hashed_password=hash_password(user_data.password),
+            firstname=user_data.firstname,
+            lastname=user_data.lastname,
+            role=UserRole.USER,
+            is_active=True,
+            is_verified=False
         )
 
-        return await self.user_repo.create(db_user)
+        created_user = await self.user_repo.create(new_user)
+        logger.info("registration_succeeded", event="auth.registered", user_id=str(created_user.id))
+        return created_user
 
     async def update_user(self, user_id: str, user_in: UserUpdate) -> User:
         user = await self.get_user_by_id(user_id)

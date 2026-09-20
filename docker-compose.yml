@@ -42,6 +42,8 @@ services:
       dockerfile: Dockerfile
     container_name: joblistapi
     restart: always
+    env_file:
+      - .env
     ports:
       - "8000:8000"
     environment:
@@ -50,7 +52,7 @@ services:
       DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres_password}
       DB_NAME: ${DB_NAME:-joblist}
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}
+      ALLOWED_ORIGINS: '${ALLOWED_ORIGINS:-["http://localhost:3000","http://localhost:5173"]}'
     depends_on:
       postgres:
         condition: service_healthy
