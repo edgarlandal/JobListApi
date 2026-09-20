@@ -46,9 +46,31 @@ class UserCreate(UserBase):
 
 class UserUpdate(UserBase):
     email: Optional[EmailStr] = None
+    firstname: Optional[str] = None
+    lastname: Optional[str] = None
     password: Optional[str] = None
     is_active: Optional[bool] = None
     role: Optional[UserRole] = None
+
+    @field_validator(
+        "email",
+        "firstname",
+        "lastname",
+        "password",
+        "is_active",
+        "role",
+        mode="before",
+    )
+    @classmethod
+    def reject_null(cls, value):
+        if value is None:
+            raise ValueError("The value cannot be null")
+        return value
+
+    @field_validator("password")
+    @classmethod
+    def validate_password_policy(cls, value: str) -> str:
+        return UserCreate.validate_password_policy(value)
     
 class UserReponse(UserBase):
     id: uuid.UUID

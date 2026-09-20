@@ -66,7 +66,7 @@ def register_exception_handler(app: FastAPI) -> None:
     @app.exception_handler(DataBaseOperationError)
     async def database_exception_handler(request: Request, exc: Exception):
         logger.error("database_error", event="error.database", exception_type=type(exc).__name__)
-
+        print("DETALLE ERROR BD:", str(exc.orig), flush=True)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={
