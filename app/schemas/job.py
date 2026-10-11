@@ -17,7 +17,6 @@ class JobCreate(BaseModel):
     notes: Optional[str] = None
     last_update_at: datetime
 
-
 class JobUpdate(BaseModel):
     enterprise: Optional[str] = None
     role: Optional[str] = None
@@ -33,8 +32,8 @@ class JobResponse(BaseModel):
     id: UUID
     enterprise: str
     role: str
-    salary: int
-    type_salary: TypeSalary
+    salary: Optional[int] = None
+    type_salary: Optional[TypeSalary] = None
     mode: Mode 
     location: str
     status_job: StatusJob

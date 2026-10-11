@@ -10,6 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 
 class TypeSalary(str, enum.Enum):
+    NA = "NA"
     DAILY = "Daily"
     WEEKLY = "Weekly"
     MONTHLY = "Mounthly"
