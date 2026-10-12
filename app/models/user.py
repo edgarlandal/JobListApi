@@ -7,6 +7,7 @@ from typing import Optional
 from sqlalchemy import String, DateTime, Enum, Boolean, Index
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.core.database import Base
 
 class UserRole(str, enum.Enum):
@@ -87,9 +88,18 @@ class User(Base):
 
     jobs: Mapped[list["Job"]] = relationship(
         back_populates="user",
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan", 
+        passive_deletes=True
     )
+    
+    skills: Mapped[list["UserSkill"]] = relationship(
+        back_populates="user",
+        cascade="all , delete-orphan",
+        passive_deletes=True,
+    ) 
 
     __table_args__ = (
         Index("idx_users_email_is_active", "email", "is_active"),
     )
+    
+    

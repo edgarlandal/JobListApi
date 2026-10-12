@@ -1,12 +1,20 @@
-# Ignore secrets and env varibles
+# Local configuration and Python environments
 .env
-venv
-.venv
-env
+.env.*
+!.env.example
+venv/
+.venv/
+env/
 
-# Ignore pycache
-*.pyc
+# Generated caches and reports
 __pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.log
 
-/.env
-/.env.production
+# Local database backups
+*.dump

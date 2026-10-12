@@ -3,7 +3,7 @@ import enum
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import ForeignKey, Numeric, String, DateTime, func, Enum
+from sqlalchemy import ForeignKey, String, DateTime, func, Enum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -94,4 +94,10 @@ class Job(Base):
 
     user: Mapped["User"] = relationship(
         back_populates="jobs"
+    )
+    
+    skills: Mapped[list["JobSkills"]] = relationship(
+        back_populates="jobs",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
     )
