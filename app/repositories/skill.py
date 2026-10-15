@@ -45,6 +45,12 @@ class SkillRepository:
             await self.db.rollback()
             raise
 
+    async def get_by_slug(self, slug: str) -> Skill | None:
+        pass
+
+    async def get_by_id(self, skill_id: str) -> Skill | None:
+        pass
+
     async def get_all(self, skip: int, limit: int) -> tuple[Sequence[Skill], int]:
         total = await self.db.scalar(select(func.count()).select_from(Skill))
         stmt = select(Skill).order_by(Skill.name, Skill.id).offset(skip).limit(limit)

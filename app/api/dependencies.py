@@ -1,4 +1,4 @@
-from typing import Annotated, List
+from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -9,36 +9,56 @@ from app.core.security import decode_acces_token
 from app.models.user import User, UserRole
 from app.repositories.job import JobRepository
 from app.repositories.refresh_token import RefreshTokenRepository
+from app.repositories.skill import SkillRepository
 from app.repositories.user import UserRepository
 from app.services.auth import AuthService
 from app.services.job import JobService
+from app.services.skill import SkillService
 from app.services.user import UserService
 
 oauth_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 
-def get_user_repository(db: AsyncSession = Depends(get_async_db)) -> UserRepository:
+def get_user_repository(
+    db: Annotated[AsyncSession, Depends(get_async_db)],
+) -> UserRepository:
     return UserRepository(db=db)
 
 
-def get_job_repository(db: AsyncSession = Depends(get_async_db)) -> JobRepository:
+def get_job_repository(
+    db: Annotated[AsyncSession, Depends(get_async_db)],
+) -> JobRepository:
     return JobRepository(db=db)
 
 
+def get_skill_repository(
+    db: Annotated[AsyncSession, Depends(get_async_db)],
+) -> SkillRepository:
+    return SkillRepository(db=db)
+
+
 def get_user_service(
-    repo: UserRepository = Depends(get_user_repository),
+    repo: Annotated[UserRepository, Depends(get_user_repository)],
 ) -> UserService:
     return UserService(repo)
 
 
 def get_auth_service(
-    repo: UserRepository = Depends(get_user_repository),
+    repo: Annotated[UserRepository, Depends(get_user_repository)],
 ) -> AuthService:
     return AuthService(repo)
 
 
-def get_job_service(repo: JobService = Depends(get_job_repository)) -> JobService:
+def get_job_service(
+    repo: Annotated[JobService, Depends(get_job_repository)],
+) -> JobService:
     return JobService(repo)
+
+
+def get_skill_service(
+    repo: Annotated[SkillService, Depends(get_skill_repository)],
+) -> SkillService:
+    return SkillService(repo)
 
 
 async def get_current_user(
@@ -65,7 +85,7 @@ async def get_current_user(
 
 
 async def get_current_active_user(
-    current_user: User = Depends(get_current_user),
+    current_user: Annotated[User, Depends(get_current_user)],
 ) -> User:
     if getattr(current_user, "disabled", False) or not getattr(
         current_user, "is_active", True
@@ -78,23 +98,30 @@ async def get_current_active_user(
 
 
 def get_refresh_token_repository(
-    db: AsyncSession = Depends(get_async_db),
+    db: Annotated[
+        AsyncSession,
+        Depends(get_async_db),
+    ],
 ) -> RefreshTokenRepository:
     return RefreshTokenRepository(db=db)
 
 
 def get_auth_service(
-    repo: UserRepository = Depends(get_user_repository),
-    refresh_repo: RefreshTokenRepository = Depends(get_refresh_token_repository),
+    repo: Annotated[UserRepository, Depends(get_user_repository)],
+    refresh_repo: Annotated[
+        RefreshTokenRepository, Depends(get_refresh_token_repository)
+    ],
 ):
     return AuthService(user_repo=repo, refresh_repo=refresh_repo)
 
 
 class RoleChecker:
-    def __init__(self, allowed_roles: List[UserRole]):
+    def __init__(self, allowed_roles: list[UserRole]):
         self.allowed_roles = allowed_roles
 
-    def __call__(self, current_user: User = Depends(get_current_active_user)) -> User:
+    def __call__(
+        self, current_user: Annotated[User, Depends(get_current_active_user)]
+    ) -> User:
         if current_user.role not in self.allowed_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -104,5 +131,5 @@ class RoleChecker:
         return current_user
 
 
-def require_role(allowed_roles: List[UserRole]):
+def require_role(allowed_roles: list[UserRole]):
     return RoleChecker(allowed_roles)
