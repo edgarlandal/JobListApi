@@ -1,18 +1,17 @@
 import re
 import uuid
-
+from datetime import datetime
 from typing import Optional
 
-from datetime import datetime
-from pydantic import BaseModel, EmailStr, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
 from app.models.user import UserRole
+
 
 class UserBase(BaseModel):
     email: EmailStr
     firstname: str
     lastname: str
-
 
     @field_validator("email")
     @classmethod
@@ -27,6 +26,7 @@ class UserBase(BaseModel):
             raise ValueError("The value can't empty")
 
         return cleaned
+
 
 class UserCreate(UserBase):
     password: str
@@ -43,6 +43,7 @@ class UserCreate(UserBase):
         if not re.search(r"[0-9]", v):
             raise ValueError("It must include at least one number")
         return v
+
 
 class UserUpdate(UserBase):
     email: Optional[EmailStr] = None
@@ -71,7 +72,8 @@ class UserUpdate(UserBase):
     @classmethod
     def validate_password_policy(cls, value: str) -> str:
         return UserCreate.validate_password_policy(value)
-    
+
+
 class UserReponse(UserBase):
     id: uuid.UUID
     role: UserRole
@@ -81,5 +83,3 @@ class UserReponse(UserBase):
     last_login_at: Optional[datetime]
 
     model_config = ConfigDict(from_attributes=True)
-
-    

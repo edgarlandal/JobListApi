@@ -21,7 +21,6 @@ class LoggedFastAPI(FastAPI):
     def build_middleware_stack(self):
         return LoggingAndCorrelationMiddleware(super().build_middleware_stack())
 
-
 def create_app():
     app = LoggedFastAPI(title=settings.PROJECT_NAME)
 

@@ -1,21 +1,23 @@
 from datetime import datetime
-from uuid import UUID
 from typing import Optional
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
-from app.models.job import TypeSalary, Mode, StatusJob
+from app.models.job import Mode, StatusJob, TypeSalary
+
 
 class JobCreate(BaseModel):
     enterprise: str
     role: str
     salary: Optional[int] = None
     type_salary: Optional[TypeSalary] = None
-    mode: Mode 
+    mode: Mode
     location: str
     status_job: StatusJob
     notes: Optional[str] = None
     last_update_at: datetime
+
 
 class JobUpdate(BaseModel):
     enterprise: Optional[str] = None
@@ -28,13 +30,14 @@ class JobUpdate(BaseModel):
     notes: Optional[str] = None
     last_update_at: Optional[datetime] = None
 
+
 class JobResponse(BaseModel):
     id: UUID
     enterprise: str
     role: str
     salary: Optional[int] = None
     type_salary: Optional[TypeSalary] = None
-    mode: Mode 
+    mode: Mode
     location: str
     status_job: StatusJob
     notes: str

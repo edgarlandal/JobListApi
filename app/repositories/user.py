@@ -1,10 +1,13 @@
-from typing import Sequence
+from collections.abc import Sequence
 from uuid import UUID
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+
+from sqlalchemy import func, select
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.models.user import User
 from app.schemas.user import UserUpdate
+
 
 class UserRepository:
     def __init__(self, db: AsyncSession) -> User | None:
@@ -33,7 +36,7 @@ class UserRepository:
         await self.db.commit()
         await self.db.refresh(db_user)
         return db_user
-    
+
     async def delete(self, db_user: User) -> None:
         await self.db.delete(db_user)
         await self.db.commit()
@@ -50,12 +53,9 @@ class UserRepository:
         except SQLAlchemyError:
             await self.db.rollback()
             raise
-    
+
     async def get_all(self, skip: int, limit: int) -> tuple[Sequence[User], int]:
         total = await self.db.scalar(select(func.count()).select_from(User))
         stmt = select(User).order_by(User.created_at, User.id).offset(skip).limit(limit)
         res = await self.db.execute(stmt)
         return res.scalars().all(), total
-
-
-
