@@ -1,7 +1,6 @@
 import re
 import uuid
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
@@ -46,12 +45,12 @@ class UserCreate(UserBase):
 
 
 class UserUpdate(UserBase):
-    email: Optional[EmailStr] = None
-    firstname: Optional[str] = None
-    lastname: Optional[str] = None
-    password: Optional[str] = None
-    is_active: Optional[bool] = None
-    role: Optional[UserRole] = None
+    email: EmailStr | None
+    firstname: str | None
+    lastname: str | None
+    password: str | None
+    is_active: bool | None
+    role: UserRole | None
 
     @field_validator(
         "email",
@@ -80,6 +79,6 @@ class UserReponse(UserBase):
     is_active: bool
     is_verified: bool
     created_at: datetime
-    last_login_at: Optional[datetime]
+    last_login_at: datetime | None
 
     model_config = ConfigDict(from_attributes=True)

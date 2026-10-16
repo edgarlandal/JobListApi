@@ -4,12 +4,10 @@ from fastapi.responses import JSONResponse
 from loguru import logger
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.core.config import settings
 from app.core.exceptions import (
     AuthenticationError,
     AuthorizationError,
     DataBaseOperationError,
-    DomainException,
     ResourceNotFoundError,
 )
 

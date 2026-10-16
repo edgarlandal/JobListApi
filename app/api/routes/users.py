@@ -32,7 +32,7 @@ async def get_my_profile(
 async def list_users(
     actor: Annotated[User, Depends(require_role([UserRole.ADMIN]))],
     service: Annotated[UserService, Depends(get_user_service)],
-    pagination: PaginationParams = Depends(),
+    pagination: Annotated[PaginationParams, Depends()],
 ):
     result = await service.get_users(pagination)
     logger.info("users_listed", event="admin.users_listed", actor_id=str(actor.id))

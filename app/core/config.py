@@ -17,10 +17,10 @@
 
 # DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
-from typing import Optional, List
-from pydantic import Field, PostgresDsn
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy.engine import URL
+
 
 class Setting(BaseSettings):
     PROJECT_NAME: str = "Job List"
@@ -40,26 +40,27 @@ class Setting(BaseSettings):
 
     DB_POOL_SIZE: int = 20
     DB_MAX_OVERFLOW: int = 10
-    DB_POOL_TIMEOUT: int  = 30
+    DB_POOL_TIMEOUT: int = 30
     DB_POOL_RECYCLE: int = 1800
     DB_ECHO: bool = False
 
-    ALLOWED_ORIGINS: List[str] = [
-        "http://localhost:3000",
-        "http://localhost:5173"
-    ]
+    ALLOWED_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:5173"]
 
-    # JWT 
-    JWT_SECRET_KEY: str = Field(..., min_length=32, description="JWT Secret Key of 32 character")
+    # JWT
+    JWT_SECRET_KEY: str = Field(
+        ..., min_length=32, description="JWT Secret Key of 32 character"
+    )
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
-    # API Keys 
+    # API Keys
 
     @property
     def database_url(self) -> str:
-        return self._database_url("postgresql+asyncpg").render_as_string(hide_password=False)
+        return self._database_url("postgresql+asyncpg").render_as_string(
+            hide_password=False
+        )
 
     @property
     def migration_database_url(self) -> URL:
@@ -76,10 +77,7 @@ class Setting(BaseSettings):
         )
 
     model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        case_sensitive=True,
-        extra="ignore"
+        env_file=".env", env_file_encoding="utf-8", case_sensitive=True, extra="ignore"
     )
 
 

@@ -25,7 +25,7 @@ async def create_job(
 async def list_jobs(
     actor: Annotated[User, Depends(require_role([UserRole.USER, UserRole.ADMIN]))],
     service: Annotated[JobService, Depends(get_job_service)],
-    pagination: PaginationParams = Depends(),
+    pagination: Annotated[PaginationParams, Depends()],
 ):
     result = await service.get_jobs(pagination)
     logger.info("jobs_listed", event="user.jobs_listed", actor_id=str(actor.id))

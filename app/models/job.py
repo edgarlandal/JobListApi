@@ -72,7 +72,7 @@ class Job(Base):
         Enum(StatusJob, name="status_job"), nullable=False
     )
 
-    last_update_at: Mapped[Optional[datetime]] = mapped_column(
+    last_update_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True, default=None, server_default=func.now()
     )
 
