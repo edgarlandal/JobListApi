@@ -12,7 +12,7 @@ class UserSkillRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def create(self, skill_user: UserSkill):
+    async def create(self, skill_user: UserSkill) -> UserSkill:
         try:
             self.db.add(skill_user)
             await self.db.commit()
@@ -56,19 +56,18 @@ class UserSkillRepository:
 
         return bool(await self.db.scalar(stmt))
 
-    async def get_skill_existing(
+    async def get_by_user_and_skill(
         self,
         skill_id: UUID,
         user_id: UUID,
-    ) -> bool:
-        stmt = select(
-            exists().where(
-                UserSkill.user_id == user_id,
-                UserSkill.skill_id == skill_id,
-            )
+    ) -> UserSkill | None:
+        stmt = select(UserSkill).where(
+            UserSkill.user_id == user_id,
+            UserSkill.skill_id == skill_id,
         )
+        res = await self.db.execute(stmt)
 
-        return bool(await self.db.scalar(stmt))
+        return res.scalar_one_or_none()
 
     async def get_skills_by_user_id(
         self, user_id: UUID, skip: int, limit: int
