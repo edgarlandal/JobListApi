@@ -38,7 +38,7 @@ async def list_skills(
 @router.get(
     "/{skill_id}",
     response_model=SkillResponseBase,
-    dependencies=[Depends(require_role(UserRole.USER))],
+    dependencies=[Depends(require_role([UserRole.USER, UserRole.ADMIN]))],
 )
 async def get_skill(
     skill_id: str, service: Annotated[SkillService, Depends(get_skill_service)]

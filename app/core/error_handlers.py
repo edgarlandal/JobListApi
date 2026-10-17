@@ -1,3 +1,5 @@
+import traceback
+
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -76,6 +78,12 @@ def register_exception_handler(app: FastAPI) -> None:
     # 6. Unexpected / Unhandled Errors (500 Internal Server Error)
     @app.exception_handler(Exception)
     async def unexpected_exception_handler(request: Request, exc: Exception):
+        traceback.print_exception(
+            type(exc),
+            exc,
+            exc.__traceback__,
+        )
+
         logger.error(
             "unhandled_error",
             exc_info=True,
@@ -84,11 +92,4 @@ def register_exception_handler(app: FastAPI) -> None:
                 "exception_type": type(exc).__name__,
                 "error_message": str(exc),
             },
-        )
-
-        message = "There was an internal error processing the request."
-
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"error": "Internal Server Error", "message": message},
         )

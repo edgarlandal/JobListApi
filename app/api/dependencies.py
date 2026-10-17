@@ -10,10 +10,12 @@ from app.models.user import User, UserRole
 from app.repositories.job import JobRepository
 from app.repositories.refresh_token import RefreshTokenRepository
 from app.repositories.skill import SkillRepository
+from app.repositories.skill_user import UserSkillRepository
 from app.repositories.user import UserRepository
 from app.services.auth import AuthService
 from app.services.job import JobService
 from app.services.skill import SkillService
+from app.services.skill_user import UserSkillService
 from app.services.user import UserService
 
 oauth_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
@@ -35,6 +37,12 @@ def get_skill_repository(
     db: Annotated[AsyncSession, Depends(get_async_db)],
 ) -> SkillRepository:
     return SkillRepository(db=db)
+
+
+def get_skill_user_repository(
+    db: Annotated[AsyncSession, Depends(get_async_db)],
+):
+    return UserSkillRepository(db=db)
 
 
 def get_user_service(
@@ -59,6 +67,12 @@ def get_skill_service(
     repo: Annotated[SkillService, Depends(get_skill_repository)],
 ) -> SkillService:
     return SkillService(repo)
+
+
+def get_skill_user_service(
+    repo: Annotated[UserSkillService, Depends(get_skill_user_repository)],
+):
+    return UserSkillService(repo)
 
 
 async def get_current_user(

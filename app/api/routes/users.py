@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, status
 from loguru import logger
 
 from app.api.dependencies import get_user_service, require_role
+from app.api.routes import skills_user
 from app.models.user import User, UserRole
 from app.schemas.pagination import PaginateResponse, PaginationParams
 from app.schemas.user import UserCreate, UserReponse, UserUpdate
@@ -81,3 +82,6 @@ async def delete_user(
         actor_id=str(actor.id),
         target_id=str(target.id),
     )
+
+
+router.include_router(skills_user.router)

@@ -8,7 +8,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
-from app.api.routes import auth, healthy, jobs, skills, users
+from app.api.routes import auth, healthy, jobs, skills, skills_user, users
 from app.core.config import settings
 from app.core.error_handlers import register_exception_handler
 from app.core.middleware import (
@@ -30,7 +30,7 @@ def create_app():
         CORSMiddleware,
         allow_origins=settings.ALLOWED_ORIGINS,
         allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=[
             "Content-Type",
             "Authorization",
@@ -57,6 +57,7 @@ def create_app():
     api_router.include_router(users.router)
     api_router.include_router(jobs.router)
     api_router.include_router(skills.router)
+    # api_router.include_router(skills_user.router)
 
     app.include_router(api_router)
 

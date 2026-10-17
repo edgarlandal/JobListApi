@@ -39,12 +39,11 @@ class Skill(Base):
 
     user_skills: Mapped[list["UserSkill"]] = relationship(
         back_populates="skill",
-        passive_deletes="all",
+        cascade="save-update, merge, delete, delete-orphan",
     )
 
     job_skills: Mapped[list["JobSkill"]] = relationship(
         back_populates="skill",
-        passive_deletes="all",
     )
 
 
@@ -82,6 +81,7 @@ class UserSkill(Base):
 
     skill: Mapped["Skill"] = relationship(
         back_populates="user_skills",
+        lazy="selectin",
     )
 
 

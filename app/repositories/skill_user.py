@@ -1,10 +1,10 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import exists, func, select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.skill import UserSkill
+from app.models.skill import Skill, UserSkill
 from app.schemas.skill import SkillUserUpdate
 
 
@@ -44,12 +44,45 @@ class UserSkillRepository:
             await self.db.rollback()
             raise
 
-    async def get_skills_by_user_id(self, user_id: str) -> list[UserSkill]:
-        try:
-            res = await self.db.execute(
-                select(UserSkill).where(UserSkill.user_id == UUID(user_id))
+    async def skill_exists(
+        self,
+        skill_id: UUID,
+    ) -> bool:
+        stmt = select(
+            exists().where(
+                Skill.id == skill_id,
             )
-            return res.scalars().all()
+        )
+
+        return bool(await self.db.scalar(stmt))
+
+    async def get_skill_existing(
+        self,
+        skill_id: UUID,
+        user_id: UUID,
+    ) -> bool:
+        stmt = select(
+            exists().where(
+                UserSkill.user_id == user_id,
+                UserSkill.skill_id == skill_id,
+            )
+        )
+
+        return bool(await self.db.scalar(stmt))
+
+    async def get_skills_by_user_id(
+        self, user_id: UUID, skip: int, limit: int
+    ) -> tuple[list[UserSkill], int]:
+        try:
+            total = await self.db.scalar(select(func.count()).select_from(UserSkill))
+            stmt = (
+                select(UserSkill)
+                .where(UserSkill.user_id == user_id)
+                .offset(skip)
+                .limit(limit)
+            )
+            res = await self.db.execute(stmt)
+            return res.scalars().all(), total
         except SQLAlchemyError:
             self.db.rollback()
             raise

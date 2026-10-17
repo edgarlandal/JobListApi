@@ -19,7 +19,7 @@ class SkillService:
 
         if existing_skill:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Skill is register"
+                status_code=status.HTTP_409_CONFLICT, detail="Skill is register"
             )
 
         new_skill = Skill(

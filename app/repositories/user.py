@@ -42,8 +42,7 @@ class UserRepository:
         await self.db.commit()
 
     async def get_by_email(self, email: str) -> User | None:
-        stmt = select(User).where(User.email == email)
-        res = await self.db.execute(stmt)
+        res = await self.db.execute(select(User).where(User.email == email))
         return res.scalar_one_or_none()
 
     async def get_by_id(self, user_id: str) -> User | None:

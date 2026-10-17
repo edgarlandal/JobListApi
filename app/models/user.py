@@ -71,8 +71,9 @@ class User(Base):
 
     skills: Mapped[list["UserSkill"]] = relationship(
         back_populates="user",
-        cascade="all , delete-orphan",
+        cascade="save-update, merge, delete, delete-orphan",
         passive_deletes=True,
+        lazy="selectin",
     )
 
     __table_args__ = (Index("idx_users_email_is_active", "email", "is_active"),)

@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+from uuid import UUID
 
 from sqlalchemy import func, select
 from sqlalchemy.exc import SQLAlchemyError
@@ -46,10 +47,20 @@ class SkillRepository:
             raise
 
     async def get_by_slug(self, slug: str) -> Skill | None:
-        pass
+        try:
+            res = await self.db.execute(select(Skill).where(Skill.slug == slug))
+            return res.scalars().first()
+        except SQLAlchemyError:
+            await self.db.rollback()
+            raise
 
     async def get_by_id(self, skill_id: str) -> Skill | None:
-        pass
+        try:
+            res = await self.db.execute(select(Skill).where(Skill.id == UUID(skill_id)))
+            return res.scalars().first()
+        except SQLAlchemyError:
+            await self.db.rollback()
+            raise
 
     async def get_all(self, skip: int, limit: int) -> tuple[Sequence[Skill], int]:
         total = await self.db.scalar(select(func.count()).select_from(Skill))
