@@ -1,26 +1,26 @@
-from loguru import logger
+import traceback
 
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from loguru import logger
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.core.config import settings
 from app.core.exceptions import (
     AuthenticationError,
     AuthorizationError,
     DataBaseOperationError,
-    DomainException,
-    ResourceNotFoundError
+    ResourceNotFoundError,
 )
-
 
 
 def register_exception_handler(app: FastAPI) -> None:
 
     # 1. Validation Errors (Errores de entrada Pydantic / Query / Path)
     @app.exception_handler(RequestValidationError)
-    async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    async def validation_exception_handler(
+        request: Request, exc: RequestValidationError
+    ):
         errors = []
 
         for err in exc.errors():
@@ -30,10 +30,7 @@ def register_exception_handler(app: FastAPI) -> None:
 
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            content={
-                "error" : "Validation Error",
-                "details": errors
-            }
+            content={"error": "Validation Error", "details": errors},
         )
 
     # 2. Authentication Errors
@@ -42,7 +39,7 @@ def register_exception_handler(app: FastAPI) -> None:
         return JSONResponse(
             status_code=status.HTTP_401_UNAUTHORIZED,
             content={"error": "Faild Authentication", "message": exc.message},
-            headers={"WWW-Authenticate": "Bearer"}
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
     # 3. Authorization Errors
@@ -50,7 +47,7 @@ def register_exception_handler(app: FastAPI) -> None:
     async def forbidden_exception_handler(request: Request, exc: AuthorizationError):
         return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN,
-            content={"error": "Denieded Access", "message": exc.message}
+            content={"error": "Denieded Access", "message": exc.message},
         )
 
     # 4. Resource Not Found
@@ -58,26 +55,35 @@ def register_exception_handler(app: FastAPI) -> None:
     async def not_found_exption_handler(request: Request, exc: ResourceNotFoundError):
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
-            content={"error": "Not found resource", "message": exc.message}
+            content={"error": "Not found resource", "message": exc.message},
         )
 
     # 5. Database Errors (SQLAlchemyError)
     @app.exception_handler(SQLAlchemyError)
     @app.exception_handler(DataBaseOperationError)
     async def database_exception_handler(request: Request, exc: Exception):
-        logger.error("database_error", event="error.database", exception_type=type(exc).__name__)
-        print("DETALLE ERROR BD:", str(exc.orig), flush=True)
+        logger.error(
+            "database_error", event="error.database", exception_type=type(exc).__name__
+        )
+        # print("DETALLE ERROR BD:", str(exc.orig), flush=True)
+        print(f"SQLAlchemy error: {type(exc).__name__}: {exc}", flush=True)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={
                 "error": "Error in database",
-                "message": "There was a problem processing the request in storage."
-            }
+                "message": "There was a problem processing the request in storage.",
+            },
         )
 
     # 6. Unexpected / Unhandled Errors (500 Internal Server Error)
     @app.exception_handler(Exception)
     async def unexpected_exception_handler(request: Request, exc: Exception):
+        traceback.print_exception(
+            type(exc),
+            exc,
+            exc.__traceback__,
+        )
+
         logger.error(
             "unhandled_error",
             exc_info=True,
@@ -86,14 +92,4 @@ def register_exception_handler(app: FastAPI) -> None:
                 "exception_type": type(exc).__name__,
                 "error_message": str(exc),
             },
-        )
-
-        message = "There was an internal error processing the request."
-
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={
-                "error": "Internal Server Error",
-                "message": message
-            }
         )

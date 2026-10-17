@@ -1,5 +1,6 @@
+import hashlib
 from datetime import datetime, timedelta, timezone
-from typing import Optional, Literal
+from typing import Literal, Optional
 
 import jwt
 from argon2 import PasswordHasher
@@ -8,15 +9,16 @@ from fastapi import HTTPException, status
 
 from app.core.config import settings
 
-import hashlib
-
 ph = PasswordHasher()
+
 
 def hash_token(toke: str) -> str:
     return hashlib.sha256(toke.encode()).hexdigest()
 
+
 def hash_password(password: str) -> str:
     return ph.hash(password)
+
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     try:
@@ -24,63 +26,62 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     except (VerifyMismatchError, VerificationError, InvalidHashError):
         return False
 
-def create_jwt_token(data: dict, expire_data: timedelta, token_type: Literal["access", "refresh"]):
+
+def create_jwt_token(
+    data: dict, expire_data: timedelta, token_type: Literal["access", "refresh"]
+):
     to_encode = data.copy()
     now = datetime.now(timezone.utc)
     expire = now + expire_data
 
-    to_encode.update({
-        "exp": expire,
-        "iat": now,
-        "type": token_type
-    })
+    to_encode.update({"exp": expire, "iat": now, "type": token_type})
 
     return jwt.encode(
-        to_encode,
-        settings.JWT_SECRET_KEY,
-        algorithm=settings.JWT_ALGORITHM
+        to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM
     )
-    
+
+
 def create_access_token(data: dict) -> str:
     return create_jwt_token(
         data=data,
         expire_data=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
-        token_type="access"
+        token_type="access",
     )
+
 
 def create_refresh_token(data: dict):
     return create_jwt_token(
         data=data,
         expire_data=timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
-        token_type="refresh"
+        token_type="refresh",
     )
 
-def decode_acces_token(token: str, expected_type: Literal["access", "refresh"]) -> Optional[dict]:
+
+def decode_acces_token(
+    token: str, expected_type: Literal["access", "refresh"]
+) -> dict | None:
     try:
-        payload = jwt.decode( 
-            token,
-            settings.JWT_SECRET_KEY,
-            algorithms=[settings.JWT_ALGORITHM]
+        payload = jwt.decode(
+            token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
         )
-        
+
         if payload.get("type") != expected_type:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=f"Token type is invalid. Is expected {expected_type}",
-                headers={"WWW-Authenticate": "Bearer"}
+                headers={"WWW-Authenticate": "Bearer"},
             )
-        
+
         return payload
     except jwt.ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token expired",
-            headers={"WWW-Authenticate": "Bearer"}
+            headers={"WWW-Authenticate": "Bearer"},
         )
     except jwt.PyJWTError:
         raise HTTPException(
-
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token is invalid",
-            headers={"WWW-Authenticate": "Bearer"}
+            headers={"WWW-Authenticate": "Bearer"},
         )

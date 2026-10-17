@@ -1,15 +1,14 @@
-from typing import Sequence
+from collections.abc import Sequence
 from uuid import UUID
 
 from loguru import logger
-
-from sqlalchemy import select, func
+from sqlalchemy import func, select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import SQLAlchemyError 
 
 from app.models.job import Job
-
 from app.schemas.job import JobUpdate
+
 
 class JobRepository:
     def __init__(self, db: AsyncSession) -> Job | None:
@@ -62,9 +61,14 @@ class JobRepository:
     async def get_all(self, skip: int, limit: int) -> tuple[Sequence[Job], int]:
         try:
             total = await self.db.scalar(select(func.count()).select_from(Job))
-            stmt = select(Job).order_by(Job.last_update_at, Job.id).offset(skip).limit(limit)
+            stmt = (
+                select(Job)
+                .order_by(Job.last_update_at, Job.id)
+                .offset(skip)
+                .limit(limit)
+            )
             res = await self.db.execute(stmt)
-            logger.info("get_jobs",  event="user.get_jobs")
+            logger.info("get_jobs", event="user.get_jobs")
 
             return res.scalars().all(), total
         except SQLAlchemyError:

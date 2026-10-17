@@ -1,4 +1,4 @@
-"""Audit probes assert observed behavior, including vulnerabilities; not a release gate."""
+"""Historical security probes assert observed vulnerabilities; not a release gate."""
 from datetime import datetime, timezone
 from unittest.mock import patch
 

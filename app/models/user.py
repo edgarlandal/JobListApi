@@ -1,95 +1,79 @@
 import enum
 import uuid
-
 from datetime import datetime, timezone
-from typing import Optional
+from typing import TYPE_CHECKING
 
-from sqlalchemy import String, DateTime, Enum, Boolean, Index
+from sqlalchemy import Boolean, DateTime, Enum, Index, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.core.database import Base
+
+if TYPE_CHECKING:
+    from app.models.job import Job
+    from app.models.skill import UserSkill
+
 
 class UserRole(str, enum.Enum):
     ADMIN = "admin"
     USER = "user"
+
 
 class User(Base):
     __tablename__ = "users"
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        unique=True, 
-        primary_key=True, 
+        unique=True,
+        primary_key=True,
         default=uuid.uuid4,
-        index=True
-    )
-    
-    email: Mapped[str] = mapped_column(
-        String(255), 
-        unique=True, 
         index=True,
-        nullable=False
-    ) 
-    
-    hashed_password: Mapped[str] = mapped_column(
-        String(255), 
-        nullable=False
     )
 
-    firstname: Mapped[str] = mapped_column(
-        String(255),
-        index=True, 
-        nullable=False
+    email: Mapped[str] = mapped_column(
+        String(255), unique=True, index=True, nullable=False
     )
 
-    lastname: Mapped[str] = mapped_column(
-        String(255), 
-        index=True, 
-        nullable=False
-    )
+    hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
+
+    firstname: Mapped[str] = mapped_column(String(255), index=True, nullable=False)
+
+    lastname: Mapped[str] = mapped_column(String(255), index=True, nullable=False)
 
     role: Mapped[UserRole] = mapped_column(
-        Enum(UserRole, name="user_role_enum"),
-        default=UserRole.USER,
-        nullable=False
+        Enum(UserRole, name="user_role_enum"), default=UserRole.USER, nullable=False
     )
 
-    is_active: Mapped[bool] = mapped_column(
-        Boolean,
-        default=True,
-        nullable=False
-    )
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
-    is_verified: Mapped[bool] = mapped_column(
-        Boolean,
-        default=False,
-        nullable=False
-    )
-   
+    is_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
-        nullable=False
+        nullable=False,
     )
 
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
-        nullable=False
+        nullable=False,
     )
 
-    last_login_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True,
-        default=None
+    last_login_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, default=None
     )
 
     jobs: Mapped[list["Job"]] = relationship(
-        back_populates="user",
-        cascade="all, delete-orphan"
+        back_populates="user", cascade="all, delete-orphan", passive_deletes=True
     )
 
-    __table_args__ = (
-        Index("idx_users_email_is_active", "email", "is_active"),
+    skills: Mapped[list["UserSkill"]] = relationship(
+        back_populates="user",
+        cascade="save-update, merge, delete, delete-orphan",
+        passive_deletes=True,
+        lazy="selectin",
     )
+
+    __table_args__ = (Index("idx_users_email_is_active", "email", "is_active"),)

@@ -2,20 +2,21 @@ from app.core.logging_config import setup_logging
 
 setup_logging()
 
-from fastapi import FastAPI, APIRouter
+from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
-
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
+from app.api.routes import auth, healthy, jobs, skills, skills_user, users
 from app.core.config import settings
-from app.core.database import async_engine, Base
-from app.core.rate_limit import limiter
-from app.api.routes import users, auth, healthy, jobs
-from app.core.middleware import SecurityHeadersMiddleware, LoggingAndCorrelationMiddleware
 from app.core.error_handlers import register_exception_handler
+from app.core.middleware import (
+    LoggingAndCorrelationMiddleware,
+    SecurityHeadersMiddleware,
+)
+from app.core.rate_limit import limiter
+
 
 class LoggedFastAPI(FastAPI):
     def build_middleware_stack(self):
@@ -29,15 +30,15 @@ def create_app():
         CORSMiddleware,
         allow_origins=settings.ALLOWED_ORIGINS,
         allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=[
             "Content-Type",
             "Authorization",
             "Accept",
             "X-Requested-With",
-            "X-Request-ID"
+            "X-Request-ID",
         ],
-        expose_headers=["Content-Disposition", "X-Request-ID"]
+        expose_headers=["Content-Disposition", "X-Request-ID"],
     )
 
     app.add_middleware(SecurityHeadersMiddleware)
@@ -50,11 +51,13 @@ def create_app():
     register_exception_handler(app)
 
     api_router = APIRouter(prefix="/api/v1")
-    
+
     api_router.include_router(healthy.router)
     api_router.include_router(auth.router)
     api_router.include_router(users.router)
     api_router.include_router(jobs.router)
+    api_router.include_router(skills.router)
+    # api_router.include_router(skills_user.router)
 
     app.include_router(api_router)
 
