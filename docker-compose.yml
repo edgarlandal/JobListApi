@@ -37,7 +37,8 @@ services:
 
 
   api:
-    build:
+    image: joblist-api:local
+    build: &api_build
       context: .
       dockerfile: Dockerfile
     container_name: joblistapi
@@ -46,7 +47,9 @@ services:
       - .env
     ports:
       - "8000:8000"
-    environment:
+    volumes:
+      - ./migrations:/app/migrations
+    environment: &api_environment
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: ${DB_USER:-postgres}
@@ -57,6 +60,28 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+    networks:
+      - internal_network
+
+  # Herramienta de desarrollo: solo se inicia cuando se solicita explícitamente.
+  migrate:
+    image: joblist-api:local
+    build: *api_build
+    profiles: ["tools"]
+    restart: "no"
+    working_dir: /app
+    entrypoint: ["alembic"]
+    command: ["upgrade", "head"]
+    env_file:
+      - .env
+    environment: *api_environment
+    volumes:
+      - ./app:/app/app:ro
+      - ./migrations:/app/migrations
+      - ./alembic.ini:/app/alembic.ini:ro
+    depends_on:
+      postgres:
         condition: service_healthy
     networks:
       - internal_network

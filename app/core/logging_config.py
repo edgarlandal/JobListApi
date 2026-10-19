@@ -1,19 +1,34 @@
 """Structured logs: only controlled metadata, never request payloads."""
+
 import json
 import logging
 import re
 import sys
 from datetime import timezone
+
 from loguru import logger
 
-SENSITIVE_KEYS = {"password", "token", "authorization", "secret", "api_key", "apikey", "cookie", "jwt"}
+SENSITIVE_KEYS = {
+    "password",
+    "token",
+    "authorization",
+    "secret",
+    "api_key",
+    "apikey",
+    "cookie",
+    "jwt",
+}
 JWT_PATTERN = re.compile(r"\beyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b")
 
 
 def redact_sensitive_data(value):
     if isinstance(value, dict):
-        return {str(k): "[REDACTED]" if any(part in str(k).lower().replace("-", "_") for part in SENSITIVE_KEYS)
-                else redact_sensitive_data(v) for k, v in value.items()}
+        return {
+            str(k): "[REDACTED]"
+            if any(part in str(k).lower().replace("-", "_") for part in SENSITIVE_KEYS)
+            else redact_sensitive_data(v)
+            for k, v in value.items()
+        }
     if isinstance(value, (list, tuple)):
         return [redact_sensitive_data(v) for v in value]
     if isinstance(value, str):
@@ -21,7 +36,8 @@ def redact_sensitive_data(value):
         value = re.sub(r"(?i)\bBearer\s+[^\s,;]+", "Bearer [REDACTED]", value)
         return re.sub(
             r"(?i)\b([\w-]*(?:password|token|secret|api[_-]?key|authorization)[\w-]*)\s*[:=]\s*(?:\"[^\"]*\"|'[^']*'|[^\s,;]+)",
-            r"\1=[REDACTED]", value,
+            r"\1=[REDACTED]",
+            value,
         )
     if value is None or isinstance(value, (bool, int, float)):
         return value
@@ -52,12 +68,16 @@ class InterceptHandler(logging.Handler):
             level = logger.level(record.levelname).name
         except ValueError:
             level = record.levelno
-        logger.bind(source=record.name).opt(exception=record.exc_info).log(level, "external_log")
+        logger.bind(source=record.name).opt(exception=record.exc_info).log(
+            level, "external_log"
+        )
 
 
 def setup_logging():
     logger.remove()
-    logger.add(sys.stdout, level="INFO", format=json_formatter, backtrace=False, diagnose=False)
+    logger.add(
+        sys.stdout, level="INFO", format=json_formatter, backtrace=False, diagnose=False
+    )
     logging.basicConfig(handlers=[InterceptHandler()], level=logging.INFO, force=True)
     for name in ("uvicorn", "uvicorn.error", "fastapi", "sqlalchemy.engine"):
         external = logging.getLogger(name)

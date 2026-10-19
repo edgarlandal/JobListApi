@@ -1,13 +1,12 @@
 import time
 import uuid
 
-from loguru import logger
-
-
 from fastapi import FastAPI
+from loguru import logger
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
+
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     def __init__(self, app: FastAPI, is_production: bool = False):
@@ -25,11 +24,13 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             response.headers["Strict-Transport-Security"] = (
                 "max-age=31536000; includeSubDomains; reload"
             )
-        
+
         return response
+
 
 class LoggingAndCorrelationMiddleware:
     """ASGI wrapper outside ServerErrorMiddleware, including 500 responses."""
+
     def __init__(self, app):
         self.app = app
 
@@ -38,7 +39,9 @@ class LoggingAndCorrelationMiddleware:
             return await self.app(scope, receive, send)
         headers = dict(scope.get("headers", []))
         try:
-            correlation_id = str(uuid.UUID(headers.get(b"x-request-id", b"").decode("ascii")))
+            correlation_id = str(
+                uuid.UUID(headers.get(b"x-request-id", b"").decode("ascii"))
+            )
         except (ValueError, UnicodeError):
             correlation_id = str(uuid.uuid4())
         scope.setdefault("state", {})["correlation_id"] = correlation_id
@@ -49,22 +52,52 @@ class LoggingAndCorrelationMiddleware:
             nonlocal status_code
             if message["type"] == "http.response.start":
                 status_code = message["status"]
-                message["headers"] = [(k, v) for k, v in message.get("headers", []) if k.lower() != b"x-request-id"]
-                message["headers"].append((b"x-request-id", correlation_id.encode("ascii")))
+                message["headers"] = [
+                    (k, v)
+                    for k, v in message.get("headers", [])
+                    if k.lower() != b"x-request-id"
+                ]
+                message["headers"].append(
+                    (b"x-request-id", correlation_id.encode("ascii"))
+                )
             await send(message)
 
         with logger.contextualize(correlation_id=correlation_id):
-            logger.info("request_started", event="request.started", method=scope["method"])
+            logger.info(
+                "request_started", event="request.started", method=scope["method"]
+            )
             try:
                 await self.app(scope, receive, send_with_id)
             except Exception as exc:
-                logger.error("request_failed", event="request.failed", exception_type=type(exc).__name__)
+                logger.error(
+                    "request_failed",
+                    event="request.failed",
+                    exception_type=type(exc).__name__,
+                )
                 raise
             finally:
                 route = getattr(scope.get("route"), "path", "unmatched")
-                log = logger.error if status_code >= 500 else logger.warning if status_code >= 400 else logger.info
-                log("request_completed", event="request.completed", method=scope["method"],
-                    route=route, status_code=status_code,
-                    duration_ms=round((time.perf_counter() - start) * 1000, 2))
-                if status_code in (401, 403) or (route.startswith("/api/v1/auth/") and status_code >= 400):
-                    logger.warning("authentication_denied", event="auth.denied", route=route, status_code=status_code)
+                log = (
+                    logger.error
+                    if status_code >= 500
+                    else logger.warning
+                    if status_code >= 400
+                    else logger.info
+                )
+                log(
+                    "request_completed",
+                    event="request.completed",
+                    method=scope["method"],
+                    route=route,
+                    status_code=status_code,
+                    duration_ms=round((time.perf_counter() - start) * 1000, 2),
+                )
+                if status_code in (401, 403) or (
+                    route.startswith("/api/v1/auth/") and status_code >= 400
+                ):
+                    logger.warning(
+                        "authentication_denied",
+                        event="auth.denied",
+                        route=route,
+                        status_code=status_code,
+                    )
