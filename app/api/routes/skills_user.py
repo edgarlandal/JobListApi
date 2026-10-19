@@ -13,7 +13,9 @@ router = APIRouter(prefix="")
 
 
 @router.post(
-    "/me/skills", response_model=SkillUserResponse, status_code=status.HTTP_201_CREATED
+    "/me/skills",
+    response_model=SkillUserResponse,
+    status_code=status.HTTP_201_CREATED,
 )
 async def add_skill_to_user(
     skill_in: SkillUserCreate,
@@ -23,7 +25,10 @@ async def add_skill_to_user(
     return await service.add_skill_user(skill_in, actor.id)
 
 
-@router.get("/me/skills", response_model=PaginateResponse[SkillUserResponse])
+@router.get(
+    "/me/skills",
+    response_model=PaginateResponse[SkillUserResponse],
+)
 async def get_skill_by_user_id(
     actor: Annotated[User, Depends(require_role([UserRole.USER, UserRole.ADMIN]))],
     service: Annotated[UserSkillService, Depends(get_skill_user_service)],

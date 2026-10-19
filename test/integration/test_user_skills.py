@@ -6,6 +6,36 @@ from sqlalchemy import select
 from app.models.skill import Skill, UserSkill
 
 
+@pytest.mark.parametrize("offset, expected_count", [(0, 1), (1, 0)])
+async def test_list_skills_only_counts_current_user_assignments(
+    client, db_session, test_user, admin_user, user_token, offset, expected_count
+):
+    skill = Skill(name="Python", slug="python")
+    db_session.add(skill)
+    await db_session.flush()
+    db_session.add_all([
+        UserSkill(user_id=test_user.id, skill_id=skill.id, level=2),
+        UserSkill(user_id=admin_user.id, skill_id=skill.id, level=1),
+    ])
+    await db_session.commit()
+
+    response = await client.get(
+        "/api/v1/users/me/skills",
+        params={"limit": 1, "offset": offset},
+        headers={"Authorization": f"Bearer {user_token}"},
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["total"] == 1
+    assert data["limit"] == 1
+    assert data["offset"] == offset
+    assert len(data["items"]) == expected_count
+    if expected_count:
+        assert data["items"][0]["skill"]["id"] == str(skill.id)
+        assert data["items"][0]["level"] == 2
+
+
 @pytest.mark.parametrize("token_fixture", ["user_token", "admin_token"])
 async def test_remove_skill_only_deletes_current_user_assignment(
     client, db_session, test_user, admin_user, request, token_fixture

@@ -44,26 +44,16 @@ class UserSkillRepository:
             await self.db.rollback()
             raise
 
-    async def skill_exists(
-        self,
-        skill_id: UUID,
-    ) -> bool:
-        stmt = select(
-            exists().where(
-                Skill.id == skill_id,
-            )
-        )
+    async def skill_exists(self, skill_id: UUID) -> bool:
+        stmt = select(exists().where(Skill.id == skill_id))
 
         return bool(await self.db.scalar(stmt))
 
     async def get_by_user_and_skill(
-        self,
-        skill_id: UUID,
-        user_id: UUID,
+        self, skill_id: UUID, user_id: UUID
     ) -> UserSkill | None:
         stmt = select(UserSkill).where(
-            UserSkill.user_id == user_id,
-            UserSkill.skill_id == skill_id,
+            UserSkill.user_id == user_id, UserSkill.skill_id == skill_id
         )
         res = await self.db.execute(stmt)
 
@@ -73,7 +63,11 @@ class UserSkillRepository:
         self, user_id: UUID, skip: int, limit: int
     ) -> tuple[list[UserSkill], int]:
         try:
-            total = await self.db.scalar(select(func.count()).select_from(UserSkill))
+            total = await self.db.scalar(
+                select(func.count())
+                .select_from(UserSkill)
+                .where(UserSkill.user_id == user_id)
+            )
             stmt = (
                 select(UserSkill)
                 .where(UserSkill.user_id == user_id)
@@ -83,5 +77,5 @@ class UserSkillRepository:
             res = await self.db.execute(stmt)
             return res.scalars().all(), total
         except SQLAlchemyError:
-            self.db.rollback()
+            await self.db.rollback()
             raise

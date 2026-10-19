@@ -10,11 +10,13 @@ from app.models.user import User, UserRole
 from app.repositories.job import JobRepository
 from app.repositories.refresh_token import RefreshTokenRepository
 from app.repositories.skill import SkillRepository
+from app.repositories.skill_job import JobSkillRepository
 from app.repositories.skill_user import UserSkillRepository
 from app.repositories.user import UserRepository
 from app.services.auth import AuthService
 from app.services.job import JobService
 from app.services.skill import SkillService
+from app.services.skill_job import JobSkillService
 from app.services.skill_user import UserSkillService
 from app.services.user import UserService
 
@@ -45,6 +47,12 @@ def get_skill_user_repository(
     return UserSkillRepository(db=db)
 
 
+def get_skill_job_repository(
+    db: Annotated[AsyncSession, Depends(get_async_db)],
+):
+    return JobSkillRepository(db=db)
+
+
 def get_user_service(
     repo: Annotated[UserRepository, Depends(get_user_repository)],
 ) -> UserService:
@@ -73,6 +81,12 @@ def get_skill_user_service(
     repo: Annotated[UserSkillService, Depends(get_skill_user_repository)],
 ):
     return UserSkillService(repo)
+
+
+def get_skill_job_service(
+    repo: Annotated[JobSkillService, Depends(get_skill_job_repository)],
+):
+    return JobSkillService(repo)
 
 
 async def get_current_user(

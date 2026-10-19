@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, status
 from loguru import logger
 
 from app.api.dependencies import get_job_service, require_role
+from app.api.routes import skills_job
 from app.models.user import User, UserRole
 from app.schemas.job import JobCreate, JobResponse, JobUpdate
 from app.schemas.pagination import PaginateResponse, PaginationParams
@@ -70,3 +71,6 @@ async def delete_job(
     target = await service.get_job_by_id(job_id)
     await service.delete_job(job_id)
     logger.info("job_deleted", event="user.job_deleted", target_id=str(target.id))
+
+
+router.include_router(skills_job.router)
