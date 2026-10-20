@@ -32,7 +32,34 @@ docker compose run --rm migrate check
 
 Los checks de salud no prueban todos los endpoints. El servicio `api` usa el código de la imagen: los cambios en `app/` requieren reconstruir y recrear la API con `docker compose up -d --build api`. El servicio `migrate` monta los modelos locales para detectar cambios sin reconstruir por cada edición de un modelo.
 
-Los comandos de esta edición se ajustaron al Compose adjunto y al diagnóstico de migraciones. No se ejecutaron contra tu Docker Desktop ni se volvió a correr la suite del proyecto.
+Los comandos de Docker no se ejecutaron contra tu Docker Desktop. Las pruebas locales se verificaron como se indica a continuación.
+
+## Pruebas unitarias de endpoints
+
+Desde la raíz del proyecto, en PowerShell:
+
+```powershell
+# Solo si todavía no tienes un entorno con las dependencias de desarrollo
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+
+# Todas las nuevas pruebas de endpoints
+.\.venv\Scripts\python.exe -m pytest test/unit/routes -q -p no:cacheprovider
+
+# Solo el CRUD de jobs, mostrando cada caso
+.\.venv\Scripts\python.exe -m pytest test/unit/routes/test_jobs_routes.py -v -p no:cacheprovider
+
+# Todas las pruebas unitarias, incluidas las de migraciones
+.\.venv\Scripts\python.exe -m pytest test/unit -q -p no:cacheprovider
+```
+
+No necesitas activar el entorno, iniciar Uvicorn ni levantar Docker, PostgreSQL o Redis. `-p no:cacheprovider` evita escribir en `.pytest_cache`.
+
+Las **103 pruebas nuevas** de `test/unit/routes/` pasaron en la ejecución local. Cubren el CRUD de `/api/v1/admin`, el registro y perfil de `/api/v1/users`, y el CRUD de `/api/v1/jobs`: códigos HTTP, respuestas, parámetros enviados a los servicios, paginación, validación de datos, errores 404, roles y usuarios inactivos. No incluyen los subendpoints de skills ni los endpoints de autenticación y salud.
+
+Son pruebas aisladas de la capa HTTP: HTTPX ejecuta la aplicación en memoria y los servicios se sustituyen con mocks asíncronos (`create_autospec`). La identidad autenticada se simula; se conservan la exigencia de Bearer, la validación de usuario activo y los permisos reales. La decodificación JWT, la lógica de servicios y la persistencia no se verifican aquí. Una dependencia de protección hace fallar la prueba si intenta acceder a la base de datos.
+
+Los fixtures están en `test/unit/routes/conftest.py`; cada caso recibe una aplicación y mocks nuevos. Las pruebas de `JobUpdate` respetan el esquema actual: todos sus campos son obligatorios, aunque admitan `null`; enviar únicamente `notes` devuelve 422.
 
 ## Suite completa: hay fallos pendientes
 
@@ -40,9 +67,12 @@ Los comandos de esta edición se ajustaron al Compose adjunto y al diagnóstico 
 .venv/Scripts/python.exe -m pytest -q -p no:cacheprovider
 ```
 
-Resultado histórico documentado al revisar el código local (no repetido en esta edición): **8 aprobadas, 1 fallo y 11 errores**. SQLAlchemy no encuentra `UserSkill` al configurar las relaciones; el manejador de errores también intenta acceder a `exc.orig` en una excepción que no tiene ese atributo. Estos problemas ya estaban presentes antes de la limpieza.
+Resultado local del 19 de octubre de 2026: **174 aprobadas y 2 fallos previos**, ambos en `test/integration/test_auth.py`:
 
-Las pruebas usan SQLite en memoria y configuración de prueba; no modifican PostgreSQL. Las 7 pruebas aprobadas del bloque anterior cubren solo logging y configuración de migraciones, no toda la API.
+- `test_register_user`: `/auth/register` devuelve 500 porque el registro no asigna los nombres obligatorios del usuario.
+- `test_expired_jwt_token`: la prueba espera `Token expired`, pero la API devuelve `El token expiró.`.
+
+Las pruebas de integración usan SQLite en memoria y configuración de prueba; no modifican PostgreSQL. Las nuevas pruebas unitarias de endpoints usan servicios simulados y no abren conexiones de base de datos. Para ejecutar solo las de integración, usa `.venv/Scripts/python.exe -m pytest test/integration -q -p no:cacheprovider`.
 
 ## Arranque y configuración
 

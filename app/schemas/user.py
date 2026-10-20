@@ -1,8 +1,9 @@
 import re
 import uuid
 from datetime import datetime
+from typing import Any
 
-from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 from app.models.user import UserRole
 
@@ -44,33 +45,34 @@ class UserCreate(UserBase):
         return v
 
 
-class UserUpdate(UserBase):
-    email: EmailStr | None
-    firstname: str | None
-    lastname: str | None
-    password: str | None
-    is_active: bool | None
-    role: UserRole | None
-
-    @field_validator(
-        "email",
-        "firstname",
-        "lastname",
-        "password",
-        "is_active",
-        "role",
-        mode="before",
+class UserProfileUpdate(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+        str_strip_whitespace=True,
     )
+
+    firstname: str | None = Field(default=None, min_length=1)
+    lastname: str | None = Field(default=None, min_length=1)
+
+    @field_validator("firstname", "lastname", mode="before")
     @classmethod
-    def reject_null(cls, value):
+    def reject_null(cls, value: Any) -> Any:
         if value is None:
-            raise ValueError("The value cannot be null")
+            raise ValueError("El valor no puede ser null.")
         return value
 
-    @field_validator("password")
+
+class UserAdminUpdate(UserProfileUpdate):
+    is_active: bool | None = None
+    is_verified: bool | None = None
+    role: UserRole | None = None
+
+    @field_validator("is_active", "is_verified", "role", mode="before")
     @classmethod
-    def validate_password_policy(cls, value: str) -> str:
-        return UserCreate.validate_password_policy(value)
+    def reject_admin_null(cls, value: Any) -> Any:
+        if value is None:
+            raise ValueError("El valor no puede ser null.")
+        return value
 
 
 class UserReponse(UserBase):

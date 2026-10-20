@@ -5,7 +5,7 @@ from app.core.security import hash_password
 from app.models.user import User, UserRole
 from app.repositories.user import UserRepository
 from app.schemas.pagination import PaginateResponse, PaginationParams
-from app.schemas.user import UserCreate, UserReponse, UserUpdate
+from app.schemas.user import UserAdminUpdate, UserCreate, UserProfileUpdate, UserReponse
 
 
 class UserService:
@@ -17,7 +17,8 @@ class UserService:
 
         if existing_user:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail="Email is registerd"
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email is registerd",
             )
 
         new_user = User(
@@ -38,21 +39,13 @@ class UserService:
         )
         return created_user
 
-    async def update_user(self, user_id: str, user_in: UserUpdate) -> User:
+    async def admin_update_user(self, user_id: str, user_in: UserAdminUpdate) -> User:
         user = await self.get_user_by_id(user_id)
+        return await self.user_repo.update_profile(user, user_in)
 
-        if user_in.email and user_in.email != user.email:
-            existing_email = await self.user_repo.get_by_email(user_in.email)
-
-            if existing_email:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST, detail="Email is existing"
-                )
-
-        if user_in.password:
-            user.hashed_password = hash_password(user_in.password)
-
-        return await self.user_repo.update(user, user_in)
+    async def update_my_profile(self, user_id: str, user_in: UserProfileUpdate) -> User:
+        user = await self.get_user_by_id(user_id)
+        return await self.user_repo.update_profile(user, user_in)
 
     async def delete_user(self, user_id: str) -> None:
         user = await self.get_user_by_id(user_id)

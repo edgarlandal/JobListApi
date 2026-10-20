@@ -1,6 +1,6 @@
 import hashlib
 from datetime import datetime, timedelta, timezone
-from typing import Literal, Optional
+from typing import Any, Literal
 
 import jwt
 from argon2 import PasswordHasher
@@ -59,29 +59,37 @@ def create_refresh_token(data: dict):
 
 def decode_acces_token(
     token: str, expected_type: Literal["access", "refresh"]
-) -> dict | None:
+) -> dict[str, Any]:
     try:
         payload = jwt.decode(
-            token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
+            token,
+            settings.JWT_SECRET_KEY,
+            algorithms=[settings.JWT_ALGORITHM],
+            options={
+                "require": ["exp", "sub", "type"],
+                "verify_exp": True,
+            },
         )
 
-        if payload.get("type") != expected_type:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=f"Token type is invalid. Is expected {expected_type}",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
+    except jwt.ExpiredSignatureError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="El token expiró.",
+            headers={"WWW-Authenticate": "Bearer"},
+        ) from exc
 
-        return payload
-    except jwt.ExpiredSignatureError:
+    except jwt.PyJWTError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token expired",
+            detail="El token es inválido.",
             headers={"WWW-Authenticate": "Bearer"},
-        )
-    except jwt.PyJWTError:
+        ) from exc
+
+    if payload["type"] != expected_type:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token is invalid",
+            detail=f"Tipo de token inválido: se esperaba {expected_type}.",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+    return payload

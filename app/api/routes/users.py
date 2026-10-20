@@ -6,8 +6,7 @@ from loguru import logger
 from app.api.dependencies import get_user_service, require_role
 from app.api.routes import skills_user
 from app.models.user import User, UserRole
-from app.schemas.pagination import PaginateResponse, PaginationParams
-from app.schemas.user import UserCreate, UserReponse, UserUpdate
+from app.schemas.user import UserCreate, UserProfileUpdate, UserReponse
 from app.services.user import UserService
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -22,66 +21,27 @@ async def create_user(
 
 @router.get("/me", response_model=UserReponse)
 async def get_my_profile(
-    current_user: Annotated[
-        User, Depends(require_role([UserRole.ADMIN, UserRole.USER]))
-    ],
+    curr_user: Annotated[User, Depends(require_role([UserRole.USER]))],
 ):
-    return current_user
+    return curr_user
 
 
-@router.get("", response_model=PaginateResponse[UserReponse])
-async def list_users(
-    actor: Annotated[User, Depends(require_role([UserRole.ADMIN]))],
-    service: Annotated[UserService, Depends(get_user_service)],
-    pagination: Annotated[PaginationParams, Depends()],
-):
-    result = await service.get_users(pagination)
-    logger.info("users_listed", event="admin.users_listed", actor_id=str(actor.id))
-    return result
-
-
-@router.get(
-    "/{id}",
-    response_model=UserReponse,
-    dependencies=[Depends(require_role([UserRole.USER]))],
-)
-async def get_user_by_id(
-    id: str, service: Annotated[UserService, Depends(get_user_service)]
-):
-    return await service.get_user_by_id(id)
-
-
-@router.patch("/{user_id}", response_model=UserReponse)
-async def update_user(
+@router.patch("/me", response_model=UserReponse)
+async def update_profile(
     actor: Annotated[User, Depends(require_role([UserRole.USER]))],
-    user_id: str,
-    user_in: UserUpdate,
+    user_in: UserProfileUpdate,
     service: Annotated[UserService, Depends(get_user_service)],
 ):
-    result = await service.update_user(user_id=user_id, user_in=user_in)
-    logger.info(
-        "user_updated",
-        event="admin.user_updated",
-        actor_id=str(actor.id),
-        target_id=str(result.id),
-    )
-    return result
+    return await service.update_my_profile(user_id=actor.id, user_in=user_in)
 
 
-@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_user(
-    actor: Annotated[User, Depends(require_role([UserRole.ADMIN]))],
-    user_id: str,
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_profile(
+    actor: Annotated[User, Depends(require_role([UserRole.USER]))],
     service: Annotated[UserService, Depends(get_user_service)],
 ):
-    target = await service.get_user_by_id(user_id)
-    await service.delete_user(user_id)
-    logger.info(
-        "user_deleted",
-        event="admin.user_deleted",
-        actor_id=str(actor.id),
-        target_id=str(target.id),
-    )
+    await service.get_user_by_id(actor.id)
+    await service.delete_user(actor.id)
 
 
 router.include_router(skills_user.router)
